@@ -1,0 +1,20 @@
+{
+  "name": "harness-engineering",
+  "description": "A skill for building production-grade Agent systems — derived from claw-code",
+  "owner": {
+    "name": "WOWCharlotte",
+    "email": ""
+  },
+  "plugins": [
+    {
+      "name": "harness-engineering",
+      "description": "Complete 4-layer engineering methodology for building production Agent systems: Harness Core, Tool System, Plugin & Hooks, and Multi-Agent patterns.",
+      "version": "1.0.0",
+      "source": "./",
+      "author": {
+        "name": "WOWCharlotte",
+        "email": ""
+      }
+    }
+  ]
+}
