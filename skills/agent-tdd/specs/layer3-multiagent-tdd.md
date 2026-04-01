@@ -18,7 +18,7 @@ Multi-agent interaction introduces non-determinism stemming from sub-agent outpu
 
 ### Contract Testing Pseudocode
 
-Contract testing verifies that agents遵守 message type contracts without asserting on specific content.
+Contract testing verifies that agents abide by message type contracts without asserting on specific content.
 
 ```python
 class MockSubAgent:
@@ -449,7 +449,7 @@ from dataclasses import dataclass, field
 @dataclass
 class AgentMessage:
     type: str
-    content: any
+    content: Any
     metadata: dict = field(default_factory=dict)
 
 class MockSubAgent:
