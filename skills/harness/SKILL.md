@@ -1,5 +1,5 @@
 ---
-name: harness-engineering
+name: harness
 description: Use when building a production Agent system from scratch, or evaluating/refactoring an existing Agent harness architecture. Covers core runtime (Agent loop, session, permissions), tool system (registry, executor, schema), plugin hooks (PreToolUse/PostToolUse, lifecycle), and multi-agent patterns (spawn, state handoff, collaboration).
 ---
 
@@ -7,7 +7,7 @@ description: Use when building a production Agent system from scratch, or evalua
 
 ## Overview
 
-A complete engineering methodology for building production-grade Agent systems — derived from实战验证的 claw-code architecture and organized as a 4-layer framework.
+A complete engineering methodology for building production-grade Agent systems — derived from battle-tested claude-code architecture and organized as a 4-layer framework.
 
 **This is methodology, not code.** The goal is a complete engineering blueprint that teams can follow to design, implement, and evaluate their own Agent harnesses.
 
