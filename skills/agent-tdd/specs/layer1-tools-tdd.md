@@ -12,8 +12,8 @@ Agent tool selection is determined by LLM prompt. Same input, different prompt =
 
 ```
 User input: "show me foo.txt"
-├── Prompt A (tool描述模糊) → wrong tool chosen
-└── Prompt B (tool描述精确) → read_file chosen
+├── Prompt A (tool description vague) → wrong tool chosen
+└── Prompt B (tool description precise) → read_file chosen
 ```
 
 The core problem is **prompt stability**: the same natural language request must reliably map to the same tool across multiple LLM calls. Tests must lock the prompt (via seed or recorded version) so that tool selection is deterministic and verifiable.
