@@ -443,7 +443,7 @@ Layer 3: Multi-Agent TDD ← You are here
 
 ```python
 import pytest
-from typing import List
+from typing import Any, List
 from dataclasses import dataclass, field
 
 @dataclass
