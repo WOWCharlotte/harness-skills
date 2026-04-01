@@ -1,0 +1,66 @@
+<mxGraphModel>
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="2" value="Layer 4: Multi-Agent System&#xa;(Multi-Agent Orchestration)" style="rounded=1;fillColor=#FFD700;strokeColor=#B8860B;strokeWidth=2;fontStyle=1;fontSize=14;align=center;verticalAlign=top;" vertex="1" parent="1">
+      <mxGeometry x="40" y="440" width="720" height="100" as="geometry"/>
+    </mxCell>
+    <mxCell id="3" value="Agent Spawn / Fork&#xa;State Handoff&#xa;Collaboration Patterns" style="text;strokeColor=none;fillColor=none;fontSize=11;fontColor=#333;align=center;" vertex="1" parent="1">
+      <mxGeometry x="440" y="455" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="4" value="Layer 3: Plugin &amp; Hooks&#xa;(Extensibility System)" style="rounded=1;fillColor=#FF6B6B;strokeColor=#C0392B;strokeWidth=2;fontStyle=1;fontSize=14;align=center;verticalAlign=top;" vertex="1" parent="1">
+      <mxGeometry x="40" y="320" width="720" height="100" as="geometry"/>
+    </mxCell>
+    <mxCell id="5" value="PreToolUse Hook&#xa;PostToolUse Hook&#xa;Plugin Lifecycle" style="text;strokeColor=none;fillColor=none;fontSize=11;fontColor=#333;align=center;" vertex="1" parent="1">
+      <mxGeometry x="440" y="335" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="6" value="Layer 2: Tool System&#xa;(Execution Engine)" style="rounded=1;fillColor=#4ECDC4;strokeColor=#16A085;strokeWidth=2;fontStyle=1;fontSize=14;align=center;verticalAlign=top;" vertex="1" parent="1">
+      <mxGeometry x="40" y="200" width="720" height="100" as="geometry"/>
+    </mxCell>
+    <mxCell id="7" value="Tool Registry&#xa;Permission Model&#xa;Execution Context" style="text;strokeColor=none;fillColor=none;fontSize=11;fontColor=#333;align=center;" vertex="1" parent="1">
+      <mxGeometry x="440" y="215" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="8" value="Layer 1: Harness Core&#xa;(Runtime Engine)" style="rounded=1;fillColor=#5C9EFF;strokeColor=#295FAD;strokeWidth=2;fontStyle=1;fontSize=14;align=center;verticalAlign=top;" vertex="1" parent="1">
+      <mxGeometry x="40" y="80" width="720" height="100" as="geometry"/>
+    </mxCell>
+    <mxCell id="9" value="Agent Loop&#xa;Session Management&#xa;Config &amp; Permissions" style="text;strokeColor=none;fillColor=none;fontSize=11;fontColor=#333;align=center;" vertex="1" parent="1">
+      <mxGeometry x="440" y="95" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="10" value="Anthropic API&#xa;(Claude Model)" style="rounded=1;fillColor=#E8E8E8;strokeColor=#999;strokeWidth=1;fontSize=12;align=center;" vertex="1" parent="1">
+      <mxGeometry x="300" y="580" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="11" value="External Tools&#xa;(Filesystem, Bash, Web...)" style="rounded=1;fillColor=#E8E8E8;strokeColor=#999;strokeWidth=1;fontSize=12;align=center;" vertex="1" parent="1">
+      <mxGeometry x="40" y="580" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="12" value="" style="endArrow=classic;endFill=1;strokeColor=#295FAD;strokeWidth=2;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="400" y="180" as="sourcePoint"/>
+        <mxPoint x="400" y="300" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="13" value="" style="endArrow=classic;endFill=1;strokeColor=#16A085;strokeWidth=2;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="400" y="300" as="sourcePoint"/>
+        <mxPoint x="400" y="420" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="14" value="calls" style="endArrow=classic;endFill=1;strokeColor=#B8860B;strokeWidth=2;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="400" y="540" as="sourcePoint"/>
+        <mxPoint x="400" y="620" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="15" value="" style="endArrow=classic;endFill=1;strokeColor=#666;strokeWidth=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="100" y="540" as="sourcePoint"/>
+        <mxPoint x="100" y="630" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="16" value="" style="endArrow=classic;endFill=1;strokeColor=#666;strokeWidth=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="550" y="180" as="sourcePoint"/>
+        <mxPoint x="550" y="630" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>

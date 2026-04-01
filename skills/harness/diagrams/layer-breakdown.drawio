@@ -1,0 +1,115 @@
+<mxGraphModel>
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- Layer 1: Harness Core -->
+    <mxCell id="2" value="Layer 1: Harness Core" style="rounded=1;fillColor=#5C9EFF;strokeColor=#295FAD;strokeWidth=3;fontStyle=1;fontSize=16;fontColor=#FFFFFF;align=center;" vertex="1" parent="1">
+      <mxGeometry x="40" y="40" width="720" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- L1: Agent Loop -->
+    <mxCell id="3" value="Agent Loop" style="rounded=1;fillColor=#D6E4FF;strokeColor=#295FAD;strokeWidth=2;fontStyle=1;fontSize=13;align=center;" vertex="1" parent="1">
+      <mxGeometry x="60" y="110" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="4" value="while (!done)&#xa;  messages ← render()&#xa;  response ← llm(messages)&#xa;  tools ← parse_tools(response)&#xa;  for tool in tools&#xa;    result ← executor.run(tool)&#xa;    messages.push(result)" style="text;strokeColor=none;fillColor=none;fontSize=10;align=left;spacingLeft=4;" vertex="1" parent="1">
+      <mxGeometry x="230" y="100" width="220" height="80" as="geometry"/>
+    </mxCell>
+
+    <!-- L1: Session -->
+    <mxCell id="5" value="Session Manager" style="rounded=1;fillColor=#D6E4FF;strokeColor=#295FAD;strokeWidth=2;fontStyle=1;fontSize=13;align=center;" vertex="1" parent="1">
+      <mxGeometry x="60" y="200" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="6" value="Session {&#xa;  id: UUID&#xa;  messages: Message[]&#xa;  metadata: Map&#xa;  created_at, updated_at&#xa;}" style="text;strokeColor=none;fillColor=none;fontSize=10;align=left;spacingLeft=4;" vertex="1" parent="1">
+      <mxGeometry x="230" y="200" width="200" height="60" as="geometry"/>
+    </mxCell>
+
+    <!-- L1: Config -->
+    <mxCell id="7" value="Config System" style="rounded=1;fillColor=#D6E4FF;strokeColor=#295FAD;strokeWidth=2;fontStyle=1;fontSize=13;align=center;" vertex="1" parent="1">
+      <mxGeometry x="60" y="290" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="8" value="Permissions&#xa;Model Config&#xa;API Keys&#xa;Feature Flags" style="text;strokeColor=none;fillColor=none;fontSize=10;align=left;spacingLeft=4;" vertex="1" parent="1">
+      <mxGeometry x="230" y="295" width="180" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- L1: Permission Policy -->
+    <mxCell id="9" value="Permission Policy" style="rounded=1;fillColor=#D6E4FF;strokeColor=#295FAD;strokeWidth=2;fontStyle=1;fontSize=13;align=center;" vertex="1" parent="1">
+      <mxGeometry x="60" y="380" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="10" value="PermissionMode:&#xa;  ReadOnly&#xa;  WorkspaceWrite&#xa;  DangerFullAccess" style="text;strokeColor=none;fillColor=none;fontSize=10;align=left;spacingLeft=4;" vertex="1" parent="1">
+      <mxGeometry x="230" y="375" width="200" height="70" as="geometry"/>
+    </mxCell>
+
+    <!-- Layer 2: Tool System -->
+    <mxCell id="13" value="Layer 2: Tool System" style="rounded=1;fillColor=#4ECDC4;strokeColor=#16A085;strokeWidth=3;fontStyle=1;fontSize=16;fontColor=#FFFFFF;align=center;" vertex="1" parent="1">
+      <mxGeometry x="40" y="300" width="720" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- L2: Tool Registry -->
+    <mxCell id="14" value="Tool Registry" style="rounded=1;fillColor=#D1F2EB;strokeColor=#16A085;strokeWidth=2;fontStyle=1;fontSize=13;align=center;" vertex="1" parent="1">
+      <mxGeometry x="60" y="370" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="15" value="ToolSpec {&#xa;  name, description&#xa;  input_schema&#xa;  required_permission&#xa;  execute()&#xa;}" style="text;strokeColor=none;fillColor=none;fontSize=10;align=left;spacingLeft=4;" vertex="1" parent="1">
+      <mxGeometry x="230" y="365" width="210" height="70" as="geometry"/>
+    </mxCell>
+
+    <!-- L2: Tool Executor -->
+    <mxCell id="16" value="Tool Executor" style="rounded=1;fillColor=#D1F2EB;strokeColor=#16A085;strokeWidth=2;fontStyle=1;fontSize=13;align=center;" vertex="1" parent="1">
+      <mxGeometry x="460" y="370" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="17" value="trait ToolExecutor {&#xa;  async fn execute(&#xa;    &amp;self,&#xa;    spec: ToolSpec,&#xa;    input: Value&#xa;  ) → Result&lt;Value&gt;" style="text;strokeColor=none;fillColor=none;fontSize=10;align=left;spacingLeft=4;" vertex="1" parent="1">
+      <mxGeometry x="630" y="365" width="200" height="70" as="geometry"/>
+    </mxCell>
+
+    <!-- L2: Execution Context -->
+    <mxCell id="18" value="Execution Context" style="rounded=1;fillColor=#D1F2EB;strokeColor=#16A085;strokeWidth=2;fontStyle=1;fontSize=13;align=center;" vertex="1" parent="1">
+      <mxGeometry x="460" y="450" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="19" value="ExecutionContext {&#xa;  session_id&#xa;  working_dir&#xa;  env_vars&#xa;  tool_results_cache&#xa;}" style="text;strokeColor=none;fillColor=none;fontSize=10;align=left;spacingLeft=4;" vertex="1" parent="1">
+      <mxGeometry x="630" y="455" width="200" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- Layer 3: Plugin & Hooks -->
+    <mxCell id="21" value="Layer 3: Plugin &amp; Hooks" style="rounded=1;fillColor=#FF6B6B;strokeColor=#C0392B;strokeWidth=3;fontStyle=1;fontSize=16;fontColor=#FFFFFF;align=center;" vertex="1" parent="1">
+      <mxGeometry x="40" y="440" width="720" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- L3: PreToolUse -->
+    <mxCell id="22" value="PreToolUse Hook" style="rounded=1;fillColor=#FFD6D6;strokeColor=#C0392B;strokeWidth=2;fontStyle=1;fontSize=13;align=center;" vertex="1" parent="1">
+      <mxGeometry x="60" y="510" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="23" value="validate params&#xa;modify params&#xa;block execution&#xa;log &amp; trace" style="text;strokeColor=none;fillColor=none;fontSize=10;align=left;spacingLeft=4;" vertex="1" parent="1">
+      <mxGeometry x="230" y="515" width="180" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- L3: PostToolUse -->
+    <mxCell id="24" value="PostToolUse Hook" style="rounded=1;fillColor=#FFD6D6;strokeColor=#C0392B;strokeWidth=2;fontStyle=1;fontSize=13;align=center;" vertex="1" parent="1">
+      <mxGeometry x="460" y="510" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="25" value="format output&#xa;check invariants&#xa;emit events&#xa;auto-retry on failure" style="text;strokeColor=none;fillColor=none;fontSize=10;align=left;spacingLeft=4;" vertex="1" parent="1">
+      <mxGeometry x="630" y="515" width="180" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- Layer 4: Multi-Agent -->
+    <mxCell id="27" value="Layer 4: Multi-Agent System" style="rounded=1;fillColor=#FFD700;strokeColor=#B8860B;strokeWidth=3;fontStyle=1;fontSize=16;fontColor=#333;align=center;" vertex="1" parent="1">
+      <mxGeometry x="40" y="560" width="720" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- L4: Agent Spawn -->
+    <mxCell id="28" value="Agent Spawn" style="rounded=1;fillColor=#FFF8DC;strokeColor=#B8860B;strokeWidth=2;fontStyle=1;fontSize=13;align=center;" vertex="1" parent="1">
+      <mxGeometry x="60" y="630" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="29" value="forkSubagent()&#xa;runAgent()&#xa;resumeAgent()" style="text;strokeColor=none;fillColor=none;fontSize=10;align=left;spacingLeft=4;" vertex="1" parent="1">
+      <mxGeometry x="230" y="640" width="180" height="40" as="geometry"/>
+    </mxCell>
+
+    <!-- L4: Built-in Agents -->
+    <mxCell id="30" value="Built-in Agents" style="rounded=1;fillColor=#FFF8DC;strokeColor=#B8860B;strokeWidth=2;fontStyle=1;fontSize=13;align=center;" vertex="1" parent="1">
+      <mxGeometry x="460" y="630" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="31" value="guideAgent&#xa;exploreAgent&#xa;planAgent&#xa;verificationAgent" style="text;strokeColor=none;fillColor=none;fontSize=10;align=left;spacingLeft=4;" vertex="1" parent="1">
+      <mxGeometry x="630" y="635" width="180" height="50" as="geometry"/>
+    </mxCell>
+
+  </root>
+</mxGraphModel>
