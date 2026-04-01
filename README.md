@@ -1,6 +1,6 @@
 # Harness Engineering
 
-A skill for building production-grade Agent systems — derived from实战验证的 claw-code architecture.
+A skill for building production-grade Agent systems — derived from the claw-code architecture that has been verified in practical applications.
 
 ## What is this?
 
