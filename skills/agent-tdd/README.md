@@ -12,28 +12,20 @@ Agent TDD is a methodology for applying test-driven development to agent systems
 4. **Implement the feature** until tests pass
 5. **Refactor** while maintaining test coverage
 
-### 3-Layer Architecture
+### 3-Layer TDD Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        Agent System                             │
+│                     TDD Testing Layers                          │
 ├─────────────────────────────────────────────────────────────────┤
-│  Layer 3: Multi-Agent                                           │
-│  ┌─────────────┐    spawns    ┌─────────────┐                 │
-│  │ Parent Agent│──────────────│ Sub-Agent   │                 │
-│  └─────────────┘              └─────────────┘                 │
-│         │                                                    │
+│  Layer 3: Multi-Agent TDD                                       │
+│  mock sub-agent → contract test message types                  │
 ├─────────────────────────────────────────────────────────────────┤
-│  Layer 2: Harness Loop                                         │
-│  ┌─────────────────────────────────────────────────────┐       │
-│  │  LLM ──► Planner ──► Executor ──► Memory            │       │
-│  └─────────────────────────────────────────────────────┘       │
-│         │                                                    │
+│  Layer 2: Harness Loop TDD                                     │
+│  mock LLM → record & replay fixed responses                    │
 ├─────────────────────────────────────────────────────────────────┤
-│  Layer 1: Tools                                                │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐                    │
-│  │  Tool A  │  │  Tool B  │  │  Tool C  │  ...               │
-│  └──────────┘  └──────────┘  └──────────┘                    │
+│  Layer 1: Tools TDD                                            │
+│  fixed prompt → deterministic tool selection                   │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -444,24 +436,6 @@ See [specs/layer3-multiagent-tdd.md](specs/layer3-multiagent-tdd.md) for detaile
    - Layer 1: Fix prompt, verify tool selection
    - Layer 2: Mock LLM, use record/replay
    - Layer 3: Mock sub-agents, test contracts
-
-### For Bug Fixes
-
-1. **Write a regression test** that reproduces the bug
-2. **Apply the appropriate layer strategy** to verify the fix
-3. **Ensure the test passes** after the fix
-
-### For Refactoring
-
-1. **Start with existing test coverage**
-2. **Apply changes layer by layer**
-3. **Verify all tests pass** after each layer modification
-
-### For Code Reviews
-
-1. **Verify layer-appropriate testing strategy** is used
-2. **Check for anti-patterns** (see table above)
-3. **Ensure test coverage** meets 80%+ threshold
 
 ---
 
