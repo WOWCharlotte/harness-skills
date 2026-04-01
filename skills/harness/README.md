@@ -6,7 +6,7 @@ A **Harness** is the runtime system that surrounds an AI model (like Claude) and
 
 **Examples of Harnesses:** Claude Code, Cursor, Codex, OpenCode, claw-code.
 
-This skill captures the engineering methodology for building a production-grade Harness — not from theory, but from实战验证的 claw-code architecture.
+This skill captures the engineering methodology for building a production-grade Harness — not from theory, but from battle-tested claw-code architecture.
 
 ---
 
@@ -58,6 +58,9 @@ Key rules:
 - **Render before every call** — context is rebuilt fresh each turn, not accumulated
 - **Serial tool execution** — even if the model asks for multiple tools, execute one at a time
 - **Immutable history** — never modify past messages; only append results
+- **LLM retry** — exponential backoff on transient errors (network, 429, 500)
+
+> **Which LLM to use?** Layer 1 is agnostic to the model. Use Anthropic's API (recommended for tool-use natively) or any OpenAI-compatible API. See `specs/layer1-harness-core.md` for the LLMProvider interface and API integration guide.
 
 ### Session
 
@@ -228,13 +231,26 @@ Key constraints:
 
 ---
 
+## Where to Start
+
+**Building from scratch?** Start with Layer 1 first — it's the foundation everything else runs on. Read:
+1. `specs/layer1-harness-core.md` — the Agent Loop is your first decision
+2. Then Layer 2 (`specs/layer2-tool-system.md`) once you have the loop working
+3. Layers 3 and 4 when you need extensibility and multi-agent features
+
+**Evaluating an existing system?** Jump to the layer that matches your concern. Each layer spec stands alone.
+
+**Recommended implementation language:** TypeScript or Python are the most common choices for reference implementations (see claw-code's Rust/TypeScript source for examples).
+
+---
+
 ## How to Use This Skill
 
 **If you're building a new Harness:**
-1. Read `README.md` (this file) for the full picture
-2. Read each `specs/layer*.md` for detailed specifications
+1. Read this README for the full picture
+2. Start with `specs/layer1-harness-core.md` (Agent Loop first)
 3. Use `references/implementation-checklist.md` as your build checklist
-4. Cross-reference with `references/claw-code-patterns.md` to see how claw-code implements each pattern
+4. Cross-reference with `references/claw-code-patterns.md` for real implementations
 
 **If you're evaluating an existing Harness:**
 1. Read `specs/layer*.md` for what "good" looks like

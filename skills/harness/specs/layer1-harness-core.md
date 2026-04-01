@@ -172,6 +172,51 @@ enum PermissionMode {
 | WebFetch, WebSearch | ReadOnly (HTTP GET only) |
 | TaskCreate, TodoWrite | WorkspaceWrite |
 
+#### LLM Integration
+
+The Harness drives an LLM via a standard API. The key integration points:
+
+```
+LLMProvider {
+  // Send messages and receive response
+  async complete(messages: Message[], config: LLMConfig) → LLMResponse
+
+  // SSE stream for real-time tool execution
+  async complete_streaming(messages: Message[], config: LLMConfig) → Stream<LLMResponse>
+}
+
+LLMConfig {
+  model: string              // e.g. "claude-opus-4-6" or "gpt-4o"
+  temperature: f32            // Default: 1.0
+  max_tokens: u32             // Response length limit
+  tools: ToolSpec[]           // Available tools (passed to the model)
+  system_prompt: string       // Harness-level system instructions
+}
+
+LLMResponse {
+  content: Content[]          // Text and/or tool_use blocks
+  usage: UsageStats
+  stop_reason: string         // "end_turn", "max_tokens", "stop_sequence"
+}
+```
+
+**API compatibility:**
+- **Anthropic API** (recommended): Native tool-use / tool-result message types. SSE streaming required for real-time tool execution feedback.
+- **OpenAI-compatible API**: Tools must be converted to OpenAI function-calling format. Requires polling or streaming via Server-Sent Events.
+
+**Tool execution flow:**
+1. LLM returns `content` with `tool_use` blocks
+2. Harness parses each tool_use: `{ name, input }`
+3. Harness calls `tool_executor.execute(name, input)`
+4. Harness appends `ToolResultMessage` to messages
+5. Loop returns to step 1 with updated messages
+
+**Critical integration notes:**
+- The LLM call is synchronous and blocking — it won't return until the model finishes
+- For real-time UX, use SSE streaming: stream tool_use blocks as they appear, don't wait for full response
+- Tool schemas must be valid JSON Schema — malformed schemas cause silent tool call failures
+- System prompt should include: Harness identity, available tools, permission boundaries
+
 #### LLM Retry Policy
 
 ```
