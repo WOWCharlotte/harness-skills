@@ -226,14 +226,3 @@ Once the architecture assessment is complete and the plan is created:
 2. **Test per layer** — Use `agent-tdd` skill for layer-specific TDD strategies
 3. **Need code review** — Use `superpowers:requesting-code-review`
 4. **Debugging issues** — Use `superpowers:systematic-debugging`
-
-A browser-based companion for showing architecture diagrams and layer interactions. Available as a tool — not a mode.
-
-**Offering the companion:** When explaining multi-layer interactions or system design, offer once:
-> "Some of this architecture may be easier to follow with a visual diagram. Want me to show you the layer interactions in a browser?"
-
-**This offer MUST be its own message.** Do not combine with other content.
-
-**Per-question decision:** Even after the user accepts, decide FOR EACH QUESTION whether to use the browser or the terminal:
-- **Use the browser** for architecture diagrams, layer interaction maps, flowcharts
-- **Use the terminal** for implementation details, code snippets, checklist reviews
