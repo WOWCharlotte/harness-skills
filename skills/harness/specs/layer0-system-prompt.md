@@ -22,7 +22,7 @@ A well-designed system prompt ensures:
 ### 1.1 Core Tool Categories
 
 | Category | Tools | Permission Level | Usage Guidelines |
-|----------|-------|-----------------|------------------|
+|----------|-------|------------------|-------------------|
 | File Reading | `read_file`, `glob`, `grep` | ReadOnly | Prefer Read over cat/head/tail |
 | File Writing | `write_file`, `edit_file` | WorkspaceWrite | Validate paths, preserve existing content when editing |
 | Shell Execution | `bash`, `shell` | DangerFullAccess | Always set timeout, prefer specific commands over general |
@@ -76,9 +76,8 @@ Every task implementation follows this sequence:
 ### 2.3 Execution Principles
 
 1. **Act without asking** — For routine decisions, make reasonable assumptions
-2. **Minimize interruptions** — Prefer action over planning for clear tasks
-3. **Prefer action over planning** — Start coding unless explicitly asked for plan
-4. **Course corrections welcome** — User feedback is normal input
+2. **Prefer action over planning** — Start coding unless explicitly asked for plan
+3. **Course corrections welcome** — User feedback is normal input
 
 ## 3. Fork & Subagent Patterns
 
