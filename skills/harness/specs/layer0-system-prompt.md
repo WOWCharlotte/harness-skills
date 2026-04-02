@@ -1,7 +1,7 @@
 # Layer 0: System Prompt Architecture — Detailed Specification
 
 **Status:** Draft
-**Layer:** 0 of 4 (Foundation)
+**Layer:** 0 of 5 (Foundation)
 **Purpose:** Define system prompt design principles that guide agent behavior — tool usage patterns, task execution workflow, fork/subagent patterns, context management, security monitoring, and hooks configuration.
 
 ---
@@ -295,16 +295,192 @@ Before any tool execution, validate:
 
 ## Reference Implementation
 
-Source files in `../system-prompts/`:
+Source files in `../system-prompts/`. Organized by Layer 0 component.
 
-| Pattern | Source File |
-|---------|-------------|
-| Tool Usage | `system-prompt-tool-usage-*.md` (12 files) |
-| Task Execution | `system-prompt-worker-instructions.md` |
-| Fork Guidelines | `system-prompt-fork-usage-guidelines.md` |
-| Context Compaction | `system-prompt-context-compaction-summary.md` |
-| Security | `system-prompt-doing-tasks-security.md` |
-| Hooks Config | `system-prompt-hooks-configuration.md` |
-| Auto Mode | `system-prompt-auto-mode.md` |
+### Tool Usage Patterns (Section 1)
+
+| File | Description |
+|------|-------------|
+| `system-prompt-tool-usage-create-files.md` | Prefer Write over cat heredoc |
+| `system-prompt-tool-usage-edit-files.md` | Prefer Edit over sed/awk |
+| `system-prompt-tool-usage-read-files.md` | Prefer Read over cat/head/tail |
+| `system-prompt-tool-usage-search-files.md` | Prefer Glob over find/ls |
+| `system-prompt-tool-usage-search-content.md` | Prefer Grep over grep/rg |
+| `system-prompt-tool-usage-reserve-bash.md` | Reserve Bash for system commands |
+| `system-prompt-tool-usage-delegate-exploration.md` | Use Task tool for exploration |
+| `system-prompt-tool-usage-skill-invocation.md` | Skill tool for slash commands |
+| `system-prompt-tool-usage-task-management.md` | Use TodoWrite for tracking |
+| `system-prompt-tool-usage-subagent-guidance.md` | When to use subagents |
+| `system-prompt-parallel-tool-call-note-part-of-tool-usage-policy.md` | Parallel tool calls for independence |
+| `system-prompt-advisor-tool-instructions.md` | Advisor tool usage |
+| `system-prompt-tool-execution-denied.md` | Handling denied execution |
+| `system-prompt-chrome-browser-mcp-tools.md` | Chrome MCP tool loading |
+| `system-prompt-claude-in-chrome-browser-automation.md` | Browser automation guidelines |
+| `system-prompt-option-previewer.md` | Preview field for UI options |
+| `system-prompt-one-of-six-rules-for-using-sleep-command.md` | Sleep retry rules |
+| `tool-description-bash-alternative-*.md` (7 files) | Bash alternatives for read/write/search |
+| `tool-description-bash-*.md` (35+ files) | Bash tool description fragments |
+
+### Task Execution Workflow (Section 2)
+
+| File | Description |
+|------|-------------|
+| `system-prompt-worker-instructions.md` | Worker instructions for implementing changes |
+| `system-prompt-auto-mode.md` | Continuous autonomous execution mode |
+| `system-prompt-doing-tasks-ambitious-tasks.md` | Allow ambitious tasks |
+| `system-prompt-doing-tasks-help-and-feedback.md` | Help and feedback channels |
+| `system-prompt-doing-tasks-minimize-file-creation.md` | Prefer editing over creation |
+| `system-prompt-doing-tasks-no-compatibility-hacks.md` | Delete unused code entirely |
+| `system-prompt-doing-tasks-no-premature-abstractions.md` | No YAGNI abstractions |
+| `system-prompt-doing-tasks-no-time-estimates.md` | Avoid time predictions |
+| `system-prompt-doing-tasks-no-unnecessary-additions.md` | Scope discipline |
+| `system-prompt-doing-tasks-no-unnecessary-error-handling.md` | Validate at boundaries only |
+| `system-prompt-doing-tasks-read-before-modifying.md` | Read before modify |
+| `system-prompt-doing-tasks-security.md` | Security in implementation |
+| `system-prompt-doing-tasks-software-engineering-focus.md` | Software engineering context |
+| `system-prompt-executing-actions-with-care.md` | Reversibility and blast radius |
+| `system-prompt-git-status.md` | Git status display |
+| `system-prompt-minimal-mode.md` | Skip hooks/LSP for lightweight |
+| `system-prompt-output-efficiency.md` | Concise output |
+| `system-prompt-scratchpad-directory.md` | Temporary file handling |
+| `system-prompt-tone-and-style-concise-output-short.md` | Short responses |
+| `system-prompt-tone-and-style-code-references.md` | Include file_path:line_number |
+| `system-prompt-learning-mode.md` | Interactive learning mode |
+| `system-prompt-learning-mode-insights.md` | Learning insights |
+| `system-prompt-phase-four-of-plan-mode.md` | Plan writing phase (40 line limit) |
+| `system-prompt-remote-plan-mode-ultraplan.md` | Remote diagram-rich planning |
+| `system-prompt-remote-planning-session.md` | Remote planning workflow |
+| `agent-prompt-batch-slash-command.md` | Large parallelizable changes |
+| `agent-prompt-quick-git-commit.md` | Streamlined git commit |
+| `agent-prompt-quick-pr-creation.md` | Git commit + PR creation |
+| `agent-prompt-pr-comments-slash-command.md` | GitHub PR comments display |
+| `agent-prompt-review-pr-slash-command.md` | PR review |
+| `agent-prompt-schedule-slash-command.md` | Cron-based remote agents |
+| `agent-prompt-plan-mode-enhanced.md` | Software architect planning |
+| `agent-prompt-update-magic-docs.md` | Magic Doc updates |
+| `tool-description-bash-git-commit-and-pr-creation-instructions.md` | Git commit/PR instructions |
+
+### Fork & Subagent Patterns (Section 3)
+
+| File | Description |
+|------|-------------|
+| `system-prompt-fork-usage-guidelines.md` | Fork rules (no peek, no race) |
+| `system-prompt-writing-subagent-prompts.md` | Writing effective subagent prompts |
+| `system-prompt-subagent-delegation-examples.md` | Delegation examples |
+| `system-prompt-teammate-communication.md` | Agent team messaging |
+| `agent-prompt-worker-fork-execution.md` | Forked worker pattern |
+| `tool-description-agent-when-to-launch-subagents.md` | When to launch subagents |
+
+### Context Compaction (Section 4)
+
+| File | Description |
+|------|-------------|
+| `system-prompt-context-compaction-summary.md` | Continuation summary format |
+| `system-prompt-partial-compaction-instructions.md` | Detailed summary for continuation |
+| `system-prompt-mcp-tool-result-truncation.md` | Long MCP output handling |
+| `system-reminder-compact-file-reference.md` | File read before summarization |
+
+### Security Monitoring (Section 5)
+
+| File | Description |
+|------|-------------|
+| `system-prompt-doing-tasks-security.md` | Security vulnerability prevention |
+| `system-prompt-censoring-assistance-with-malicious-activities.md` | Authorized security testing |
+| `agent-prompt-bash-command-prefix-detection.md` | Command injection detection |
+| `agent-prompt-security-monitor-for-autonomous-agent-actions-first-part.md` | Security monitor (part 1) |
+| `agent-prompt-security-monitor-for-autonomous-agent-actions-second-part.md` | Security monitor (part 2) |
+| `agent-prompt-security-review-slash-command.md` | Security review |
+| `system-reminder-malware-analysis-after-read-tool-call.md` | Malware analysis guidance |
+
+### Hooks Configuration (Section 6)
+
+| File | Description |
+|------|-------------|
+| `system-prompt-hooks-configuration.md` | Hooks structure and format |
+| `agent-prompt-hook-condition-evaluator.md` | Hook condition evaluation |
+| `agent-prompt-agent-hook.md` | Stop condition verification |
+| `system-reminder-hook-*.md` (6 files) | Hook timing messages |
+
+### Agent Types
+
+| File | Description |
+|------|-------------|
+| `agent-prompt-general-purpose.md` | General-purpose subagent |
+| `agent-prompt-explore.md` | Codebase exploration agent |
+| `agent-prompt-plan-mode-enhanced.md` | Software architect agent |
+| `agent-prompt-verification-specialist.md` | Adversarial testing agent |
+| `agent-prompt-claude-guide-agent.md` | Claude Code guidance agent |
+| `agent-prompt-claudemd-creation.md` | CLAUDE.md creation agent |
+| `agent-prompt-agent-creation-architect.md` | Custom agent creation |
+| `agent-prompt-coding-session-title-generator.md` | Session title generation |
+| `agent-prompt-conversation-summarization.md` | Conversation summary |
+| `agent-prompt-recent-message-summarization.md` | Recent message summary |
+| `agent-prompt-session-search-assistant.md` | Session search |
+| `agent-prompt-session-title-and-branch-generation.md` | Title + branch generation |
+| `agent-prompt-prompt-suggestion-generator-v2.md` | Prompt suggestions |
+| `agent-prompt-status-line-setup.md` | Status line configuration |
+| `agent-prompt-webfetch-summarizer.md` | WebFetch summarizer |
+| `agent-prompt-auto-mode-rule-reviewer.md` | Auto mode rule reviewer |
+| `agent-prompt-dream-memory-consolidation.md` | Memory consolidation |
+| `agent-prompt-determine-which-memory-files-to-attach.md` | Memory file selection |
+| `system-prompt-agent-thread-notes.md` | Agent thread guidelines |
+| `system-prompt-buddy-mode.md` | Coding companion creatures |
+
+### Memory & Session Management
+
+| File | Description |
+|------|-------------|
+| `system-prompt-agent-memory-instructions.md` | Memory update guidance |
+| `system-prompt-agent-summary-generation.md` | Action summarization (3-5 words) |
+| `system-prompt-description-part-of-memory-instructions.md` | Memory file content guidance |
+| `system-prompt-team-memory-content-display.md` | Shared team memory display |
+| `system-prompt-insights-at-a-glance-summary.md` | Usage insights summary |
+| `system-prompt-insights-friction-analysis.md` | Friction pattern analysis |
+| `system-prompt-insights-on-the-horizon.md` | Future opportunities |
+| `system-prompt-insights-session-facets-extraction.md` | Session facets extraction |
+| `system-prompt-insights-suggestions.md` | CLAUDE.md suggestions |
+| `system-prompt-memory-description-of-user-feedback.md` | User feedback memory type |
+
+### Tool Descriptions (LLM-Readable)
+
+| File | Description |
+|------|-------------|
+| `tool-description-*.md` (40+ files) | Complete tool description library |
+| `tool-parameter-computer-action.md` | Tool parameter descriptions |
+
+### System Reminders (Timing-Based)
+
+| File | Description |
+|------|-------------|
+| `system-reminder-*.md` (28 files) | Session-phase reminder fragments |
+
+### Skill System
+
+| File | Description |
+|------|-------------|
+| `system-prompt-skillify-current-session.md` | Convert session to skill |
+| `system-reminder-invoked-skills.md` | Invoked skills list |
+
+### API & Data References
+
+| File | Description |
+|------|-------------|
+| `data-claude-api-reference-*.md` (8 files) | Claude API reference |
+| `data-agent-sdk-reference-*.md` (2 files) | Agent SDK reference |
+| `data-agent-sdk-patterns-*.md` (2 files) | SDK patterns |
+| `data-files-api-reference-*.md` (2 files) | Files API reference |
+| `data-message-batches-api-reference-*.md` | Message batches API |
+| `data-streaming-reference-*.md` (2 files) | Streaming reference |
+| `data-session-memory-template.md` | Session memory template |
+| `data-prompt-caching-design-optimization.md` | Prompt caching |
+| `data-http-error-codes-reference.md` | HTTP error codes |
+| `data-github-actions-workflow-for-claude-mentions.md` | GitHub Actions |
+| `data-github-app-installation-pr-description.md` | GitHub App installation |
+| `data-live-documentation-sources.md` | Live documentation |
+| `data-tool-use-concepts.md` | Tool use concepts |
+| `data-tool-use-reference-*.md` (2 files) | Tool use reference |
+| `data-model-catalog.md` | Model catalog |
+| `skill-build-with-claude-api.md` | Skill building with API |
+| `skill-*.md` (9 files) | Skill building references |
 
 ---
