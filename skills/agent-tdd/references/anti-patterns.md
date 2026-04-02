@@ -277,7 +277,7 @@ def test_multi_agent_email_response():
 
 ## Anti-Pattern 7: No Permission Boundary Tests
 
-**What looks like:**
+**What it looks like:**
 
 ```python
 def test_agent_basic_flow():
