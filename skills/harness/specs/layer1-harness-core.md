@@ -4,6 +4,8 @@
 **Layer:** 1 of 4
 **Purpose:** Runtime engine that drives the Agent loop, manages session lifecycle, and enforces permission boundaries.
 
+> **⚡ Engineering Practices Available:** This specification describes the design in abstract. For concrete implementations, see [best practices](../references/best-practices/README.md) with code examples from claw-code.
+
 ---
 
 ## Components
@@ -72,6 +74,8 @@ The Loop MUST terminate when any of these occur:
 3. User sends interrupt signal
 4. Unrecoverable error (e.g., LLM API unavailable after retries)
 
+> **Engineering Practice:** See [agent-loop-impl.md](../references/best-practices/agent-loop-impl.md) for turn-based loop implementation with budget-aware termination from claw-code.
+
 ### 1.2 Session Manager
 
 Manages session lifecycle and message history.
@@ -129,6 +133,8 @@ SessionStore {
 
 Persist after every tool execution (async, non-blocking). On crash recovery, reload latest session state.
 
+> **Engineering Practice:** See [session-management-impl.md](../references/best-practices/session-management-impl.md) for immutable session data model, persistence patterns, and transcript store implementation from claw-code.
+
 ### 1.3 Config & Permission Policy
 
 Centralized configuration and permission enforcement.
@@ -171,6 +177,8 @@ enum PermissionMode {
 | bash, shell | DangerFullAccess |
 | WebFetch, WebSearch | ReadOnly (HTTP GET only) |
 | TaskCreate, TodoWrite | WorkspaceWrite |
+
+> **Engineering Practice:** See [permission-enforcement-impl.md](../references/best-practices/permission-enforcement-impl.md) for `ToolPermissionContext` implementation with deny_names/deny_prefixes pattern and permission denial tracking.
 
 #### LLM Integration
 
@@ -230,6 +238,8 @@ RetryPolicy {
 
 Retries on: network errors, 429 rate limits, 500 internal errors.
 Does NOT retry on: 400 bad requests, 401 auth errors, 403 permission errors.
+
+> **Engineering Practice:** See [config-examples.md](../references/best-practices/config-examples.md) for `QueryEngineConfig` frozen dataclass pattern, `RetryPolicy` implementation with exponential backoff, and session configuration best practices.
 
 ---
 
