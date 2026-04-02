@@ -36,6 +36,8 @@ The term **Harness** refers to the runtime system that surrounds an AI model (li
 | Skill | Description |
 |-------|-------------|
 | **harness-engineering** | Complete methodology for building Agent systems |
+| **agent-tdd** | Test-driven development for Agent systems |
+| **agent-eval** | Evaluation of Agent systems |
 
 ## Installation
 
