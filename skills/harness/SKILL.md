@@ -19,10 +19,11 @@ Trigger this skill when:
 - Refactoring a messy or overgrown agent implementation
 - onboarding to a new Agent system codebase and needing the full architectural picture
 
-## The 4-Layer Architecture
+## The 5-Layer Architecture
 
 | Layer | Component | Key Responsibility |
 |-------|-----------|-------------------|
+| **Layer 0** | System Prompt | Tool usage patterns, task workflow, fork/subagent, context compaction, security, hooks |
 | **Layer 1** | Harness Core | Agent loop, session management, config & permissions |
 | **Layer 2** | Tool System | Tool registry, executor, permission model, execution context |
 | **Layer 3** | Plugin & Hooks | PreToolUse, PostToolUse, plugin lifecycle |
@@ -33,10 +34,12 @@ Start with Layer 1 if you're building from scratch. Jump to any layer if you're 
 ## Core Resources
 
 - **Full methodology:** `README.md`
+- **Layer 0 (System Prompt):** `specs/layer0-system-prompt.md`
 - **Layer 1 (Harness Core):** `specs/layer1-harness-core.md`
 - **Layer 2 (Tool System):** `specs/layer2-tool-system.md`
 - **Layer 3 (Plugin & Hooks):** `specs/layer3-plugin-hooks.md`
 - **Layer 4 (Multi-Agent):** `specs/layer4-multi-agent.md`
+- **System prompt patterns:** `references/system-prompt-patterns.md`
 - **claw-code mapping:** `references/claw-code-patterns.md`
 - **Engineering checklist:** `references/implementation-checklist.md`
 - **Common pitfalls:** `references/common-pitfalls.md`
@@ -59,6 +62,19 @@ cd rust && cargo build --release
 ```
 
 ## Quick Reference
+
+### Layer 0 — System Prompt
+- [ ] Tool descriptions include specific use cases and parameter descriptions
+- [ ] Tool input_schema is complete with required/optional properties
+- [ ] Permission model aligned with tool capability requirements
+- [ ] Error responses return structured format (not raw exceptions)
+- [ ] All bash commands have timeout consideration
+- [ ] File modifications read existing content first
+- [ ] Fork prompts are directives, not situation reports
+- [ ] No peek/race on fork completion notifications
+- [ ] Context compaction uses structured summary format
+- [ ] Pre-tool-use checks prevent injection attacks
+- [ ] Hooks cannot break tool execution chain
 
 ### Layer 1 — Harness Core
 - [ ] Agent Loop has explicit termination (no infinite loops)
@@ -93,6 +109,14 @@ cd rust && cargo build --release
 - [ ] Session can be forked with permission inheritance
 
 ## Common Mistakes
+
+**Layer 0:**
+- Vague tool descriptions → LLM selects wrong tool
+- Missing input_schema validation → crashes on bad input
+- Fork peeking mid-flight → context pollution
+- Fork racing results → fabricated output
+- No context compaction → context window overflow
+- Hook breaks execution chain → silent failures
 
 **Layer 1:**
 - No explicit loop termination → infinite loops
