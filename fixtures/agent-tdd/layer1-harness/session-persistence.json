@@ -1,0 +1,9 @@
+{
+  "description": "Agent saves session and resumes with equivalent state",
+  "layer": "layer1",
+  "input": "Save my current work session",
+  "expected_tools": ["bash"],
+  "session_config": {
+    "permission": "ReadOnly"
+  }
+}

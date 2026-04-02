@@ -1,0 +1,10 @@
+{
+  "description": "Agent respects max_turns limit",
+  "layer": "layer1",
+  "input": "Count from 1 to 100",
+  "expected_tools": ["bash"],
+  "session_config": {
+    "permission": "ReadOnly",
+    "max_turns": 10
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "description": "Agent selects read_file for viewing file contents",
+  "layer": "layer2",
+  "input": "Show me the contents of README.md",
+  "expected_tools": ["read_file"],
+  "session_config": {
+    "permission": "ReadOnly"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "description": "PostToolUse hook runs after tool execution",
+  "layer": "layer3",
+  "input": "List all files matching *.md",
+  "expected_tools": ["glob"],
+  "session_config": {
+    "permission": "ReadOnly",
+    "hooks": {
+      "post_tool_use": ["format_output"]
+    }
+  }
+}

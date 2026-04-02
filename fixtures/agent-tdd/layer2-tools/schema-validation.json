@@ -1,0 +1,9 @@
+{
+  "description": "Agent handles invalid tool input gracefully",
+  "layer": "layer2",
+  "input": "Read file at /nonexistent/path/file.txt",
+  "expected_tools": ["read_file"],
+  "session_config": {
+    "permission": "ReadOnly"
+  }
+}

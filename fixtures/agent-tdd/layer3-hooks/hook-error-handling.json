@@ -1,0 +1,12 @@
+{
+  "description": "Hook error does not break execution chain",
+  "layer": "layer3",
+  "input": "Show me the current directory",
+  "expected_tools": ["bash"],
+  "session_config": {
+    "permission": "ReadOnly",
+    "hooks": {
+      "pre_tool_use": ["faulty_hook"]
+    }
+  }
+}

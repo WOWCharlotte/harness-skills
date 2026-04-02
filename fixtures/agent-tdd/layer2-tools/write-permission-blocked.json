@@ -1,0 +1,9 @@
+{
+  "description": "Agent selects write_file when permission allows",
+  "layer": "layer2",
+  "input": "Create a new file called notes.txt with hello world",
+  "expected_tools": ["write_file"],
+  "session_config": {
+    "permission": "WorkspaceWrite"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "description": "PreToolUse hook runs before tool execution",
+  "layer": "layer3",
+  "input": "Read the file at ./test.txt",
+  "expected_tools": ["read_file"],
+  "session_config": {
+    "permission": "ReadOnly",
+    "hooks": {
+      "pre_tool_use": ["log_tool_name"]
+    }
+  }
+}

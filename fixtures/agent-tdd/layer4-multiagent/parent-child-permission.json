@@ -1,0 +1,9 @@
+{
+  "description": "Child agent inherits restricted permissions from parent",
+  "layer": "layer4",
+  "input": "Delegate file search to sub-agent",
+  "expected_tools": ["glob"],
+  "session_config": {
+    "permission": "ReadOnly"
+  }
+}

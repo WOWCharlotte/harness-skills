@@ -1,0 +1,9 @@
+{
+  "description": "Agent selects glob for finding files by pattern",
+  "layer": "layer2",
+  "input": "Find all TypeScript files in the project",
+  "expected_tools": ["glob"],
+  "session_config": {
+    "permission": "ReadOnly"
+  }
+}

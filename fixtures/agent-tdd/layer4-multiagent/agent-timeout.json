@@ -1,0 +1,10 @@
+{
+  "description": "Sub-agent terminates after timeout",
+  "layer": "layer4",
+  "input": "Run a long-running search task",
+  "expected_tools": ["grep"],
+  "session_config": {
+    "permission": "ReadOnly",
+    "agent_timeout_ms": 5000
+  }
+}

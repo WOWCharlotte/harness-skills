@@ -1,0 +1,9 @@
+{
+  "description": "Agent spawns sub-agent for parallel task execution",
+  "layer": "layer4",
+  "input": "Search for TODO comments in all files",
+  "expected_tools": ["grep"],
+  "session_config": {
+    "permission": "ReadOnly"
+  }
+}

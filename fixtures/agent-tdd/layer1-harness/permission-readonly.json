@@ -1,0 +1,9 @@
+{
+  "description": "ReadOnly session blocks bash execution",
+  "layer": "layer1",
+  "input": "Run echo hello in the terminal",
+  "expected_tools": [],
+  "session_config": {
+    "permission": "ReadOnly"
+  }
+}
