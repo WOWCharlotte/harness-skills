@@ -25,43 +25,7 @@ Trigger this skill when:
 
 ## Prerequisites
 
-This skill depends on the **superpowers** plugin for execution workflows. Installation varies by platform:
-
-### Claude Code (Official Marketplace)
-```bash
-/plugin install superpowers@claude-plugins-official
-```
-
-### Claude Code (via Community Marketplace)
-```bash
-/plugin marketplace add obra/superpowers-marketplace
-/plugin install superpowers@superpowers-marketplace
-```
-
-### Cursor
-```
-/add-plugin superpowers
-```
-Or search for "superpowers" in the plugin marketplace.
-
-### GitHub Copilot CLI
-```bash
-copilot plugin marketplace add obra/superpowers-marketplace
-copilot plugin install superpowers@superpowers-marketplace
-```
-
-### Gemini CLI
-```bash
-gemini extensions install https://github.com/obra/superpowers
-```
-
-### Codex / OpenCode
-Tell your agent to fetch from:
-```
-https://raw.githubusercontent.com/obra/superpowers/refs/heads/main/.codex/INSTALL.md
-```
-
-**Verify installation:** Start a new session and ask "help me plan this feature" — the agent should automatically invoke `superpowers:brainstorming`.
+This skill depends on the **superpowers** plugin for execution workflows. See `references/superpowers-installation.md` for platform-specific installation instructions and the list of required skills.
 
 
 ## Anti-Pattern: "Just Start Coding"
@@ -134,7 +98,28 @@ digraph harness {
 | **Layer 3** | Plugin & Hooks | PreToolUse, PostToolUse, plugin lifecycle | Often |
 | **Layer 4** | Multi-Agent | Sub-agent spawn, state handoff, collaboration patterns | Sometimes |
 
-**Start with Layer 1 if building from scratch.** Jump to any specific layer if evaluating or improving a subsystem.
+### Layer Dependencies
+
+```dot
+digraph layers {
+    rankdir=TB;
+    "Layer 0\nSystem Prompt" [shape=box];
+    "Layer 1\nHarness Core" [shape=box];
+    "Layer 2\nTool System" [shape=box];
+    "Layer 3\nPlugin & Hooks" [shape=box];
+    "Layer 4\nMulti-Agent" [shape=box];
+
+    "Layer 1" -> "Layer 0" [style=dashed,label="runtime config\n& session state"];
+    "Layer 2" -> "Layer 1" [label="session + permissions"];
+    "Layer 3" -> "Layer 1" [label="session hooks"];
+    "Layer 3" -> "Layer 2" [label="tool executor\nhooks"];
+    "Layer 4" -> "Layer 1" [label="fork session\nwith scoped permissions"];
+    "Layer 4" -> "Layer 2" [label="MCP tool\ndiscovery"];
+    "Layer 4" -> "Layer 3" [style=dashed,label="optional\nagent hooks"];
+}
+```
+
+**Layer 2–4 all depend on Layer 1.** Layer 3 depends on both Layer 1 and Layer 2. Layer 4 can optionally use Layer 3 hooks.
 
 ## Key Principles
 
@@ -161,6 +146,7 @@ digraph harness {
 - **claw-code mapping:** `references/claw-code-patterns.md`
 - **Engineering checklist:** `references/implementation-checklist.md`
 - **Common pitfalls:** `references/common-pitfalls.md`
+- **Superpowers installation:** `references/superpowers-installation.md`
 
 ## Layer 0 Quick Reference — System Prompt
 
@@ -212,42 +198,24 @@ digraph harness {
 - [ ] MCP tools are discoverable from parent to child agents
 - [ ] Session can be forked with permission inheritance
 
-## Common Mistakes by Layer
+## Red Flags — Diagnose by Symptom
 
-**Layer 0:**
-- Vague tool descriptions → LLM selects wrong tool
-- Missing input_schema validation → crashes on bad input
-- Fork peeking mid-flight → context pollution
-- Fork racing results → fabricated output
-- No context compaction → context window overflow
-- Hook breaks execution chain → silent failures
+Use this table when **evaluating or debugging** an existing harness. Start from the symptom column.
 
-**Layer 1:**
-- No explicit loop termination → infinite loops
-- Shared mutable session state → non-deterministic behavior
-- Permission checks at tool level instead of harness level → gaps
-- No session compaction → context window overflow
-- Missing token usage tracking → unbounded cost growth
+| Symptom | Root Cause | Missing Layer |
+|---------|-----------|--------------|
+| LLM picks wrong tool, or crashes on valid input | Vague tool descriptions or no input_schema validation | Layer 0 + Layer 2 |
+| Context window overflows in long sessions | No session compaction | Layer 1 |
+| Agent runs forever without stopping | No explicit loop termination | Layer 1 |
+| Tool calls have no effect, no error shown | Hook exception swallowed silently | Layer 3 |
+| File operations succeed without permission | Permission checks only at tool level | Layer 1 + Layer 2 |
+| Bash command hangs forever | No bash timeout | Layer 2 |
+| Sub-agent inherits admin-level permissions | No permission inheritance scoping | Layer 4 |
+| MCP tools missing from child agent | No MCP tool discovery protocol | Layer 4 |
+| Adding a tool requires changing harness core | Tools not hot-swappable | Layer 2 |
+| Non-deterministic behavior between runs | Shared mutable session state | Layer 1 |
 
-**Layer 2:**
-- Vague tool descriptions → LLM selects wrong tool
-- Missing input_schema validation → crashes on bad input
-- No bash timeout → system freeze
-- File operations bypass permission model → security gaps
-
-**Layer 3:**
-- Uncaught hook exceptions → break the execution chain
-- Hook modifies input without LLM awareness → wrong assumptions propagate
-- Undefined hook execution order → non-reproducible behavior
-- MCP server misconfiguration → tools unavailable silently
-
-**Layer 4:**
-- Parent and child share Session → context exhaustion
-- No sub-agent timeout → permanent blocking
-- Too many parallel agents → resource contention
-- Child inherits parent's full permission → privilege escalation risk
-
-Full analysis: `references/common-pitfalls.md`
+Full analysis with prevention: `references/common-pitfalls.md`
 
 
 ## After the Architecture
@@ -258,16 +226,6 @@ Once the architecture assessment is complete and the plan is created:
 2. **Test per layer** — Use `agent-tdd` skill for layer-specific TDD strategies
 3. **Need code review** — Use `superpowers:requesting-code-review`
 4. **Debugging issues** — Use `superpowers:systematic-debugging`
-
-## Integration with Other Skills
-
-- **Testing your harness:** Use `agent-tdd` skill for layer-specific TDD strategies
-- **Planning next:** Use `superpowers:writing-plans` to create implementation plan
-- **Already building:** Use `superpowers:executing-plans` to execute with checkpoints
-- **Need review:** Use `superpowers:requesting-code-review`
-- **Debugging:** Use `superpowers:systematic-debugging`
-
-## Visual Companion
 
 A browser-based companion for showing architecture diagrams and layer interactions. Available as a tool — not a mode.
 
