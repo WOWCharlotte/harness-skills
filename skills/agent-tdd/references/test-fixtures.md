@@ -284,9 +284,9 @@ function sanityCheckFixture(fixture):
   for msg in fixture.messages:
     if msg.role == "tool":
       if not msg.tool_call_id:
-        errors.append("Tool message missing tool_call_id")
+        errors.push("Tool message missing tool_call_id")
       if not msg.tool_name:
-        errors.append("Tool message missing tool_name")
+        errors.push("Tool message missing tool_name")
 
   // Check all tool responses have matching calls
   toolResponses = filter(m => m.role == "tool", fixture.messages)
