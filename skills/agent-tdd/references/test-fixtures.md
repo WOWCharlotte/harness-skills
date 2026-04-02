@@ -278,7 +278,7 @@ function sanityCheckFixture(fixture):
 
     if prev.role == "assistant" and curr.role != "tool":
       if curr.tool_calls:  # assistant with tool_calls should be followed by tool
-        errors.append(f"Message ${i}: assistant with tool_calls not followed by tool")
+        errors.push(`Message ${i}: assistant with tool_calls not followed by tool`)
 
   // Check tool_call_id linkage
   for msg in fixture.messages:
@@ -293,7 +293,7 @@ function sanityCheckFixture(fixture):
   toolCalls = extractToolCalls(fixture.messages)
 
   if len(toolResponses) != len(toolCalls):
-    errors.append(f"Tool response count (${len(toolResponses)}) != tool call count (${len(toolCalls)})")
+    errors.push(`Tool response count (${toolResponses.length}) != tool call count (${toolCalls.length})`)
 
   return {
     valid: len(errors) == 0,
