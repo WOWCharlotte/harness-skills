@@ -295,7 +295,7 @@ Before any tool execution, validate:
 
 ## Reference Implementation
 
-claw-code implements these patterns in its system prompts:
+Source files in `../system-prompts/`:
 
 | Pattern | Source File |
 |---------|-------------|

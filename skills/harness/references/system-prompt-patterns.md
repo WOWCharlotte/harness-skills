@@ -4,7 +4,7 @@
 
 **Usage:** Use this reference when designing system prompts for a new harness or updating existing prompts.
 
-**Source:** `claude-code-system-prompts-main/system-prompts/`
+**Source:** `../system-prompts/`
 
 ## Tool Usage Patterns
 
