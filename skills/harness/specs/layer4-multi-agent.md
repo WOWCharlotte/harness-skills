@@ -230,11 +230,3 @@ The parent session does NOT see the child's raw messages — only the final Agen
 **Fix:** Sub-agents have isolated working_dir by default. Shared resources require explicit coordination.
 
 ---
-
-## Reference Implementation
-
-claw-code implements these in:
-- **Agent tool:** `rust/crates/tools/src/lib.rs` — `AgentTool` definition
-- **Built-in agents:** `rust/crates/tools/src/agents.rs`
-- **forkSubagent:** `rust/crates/runtime/src/session.rs` — session forking logic
-- **AgentManager:** `rust/crates/runtime/src/agent_manager.rs`

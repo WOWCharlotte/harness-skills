@@ -308,8 +308,3 @@ Source files in `../system-prompts/`:
 | Auto Mode | `system-prompt-auto-mode.md` |
 
 ---
-
-**Instructions:**
-1. Create the file at `D:\Github\harness-skills\skills\harness\specs\layer0-system-prompt.md` with the content above
-2. Stage and commit with message: "feat(harness): add Layer 0 System Prompt Architecture spec"
-3. Report DONE with commit SHA

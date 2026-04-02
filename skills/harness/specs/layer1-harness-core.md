@@ -306,11 +306,3 @@ HarnessCore calls:
 **Fix:** Use JSON-safe serialization in ToolResultMessage. Strip non-serializable fields before storing.
 
 ---
-
-## Reference Implementation
-
-claw-code implements these components in:
-- **Agent Loop:** `rust/crates/runtime/src/session.rs` — `ConversationRuntime`
-- **Session:** `rust/crates/runtime/src/session.rs` — `Session` struct
-- **Config:** `rust/crates/runtime/src/config.rs`
-- **Permission:** `rust/crates/runtime/src/permissions.rs`

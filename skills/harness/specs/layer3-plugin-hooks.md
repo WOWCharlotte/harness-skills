@@ -288,11 +288,3 @@ ToolExecutor receives already-validated, hook-modified input.
 **Fix:** ExecutionContext is append-only for hook data. No modification of existing fields.
 
 ---
-
-## Reference Implementation
-
-claw-code implements these in:
-- **HookRunner:** `rust/crates/plugins/src/hook_runner.rs`
-- **Built-in hooks:** `rust/crates/plugins/bundled/sample-hooks/hooks/pre.sh`, `hooks/post.sh`
-- **PluginManager:** `rust/crates/plugins/src/plugin_manager.rs`
-- **Lifecycle:** `rust/crates/plugins/src/lifecycle.rs`

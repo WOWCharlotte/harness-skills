@@ -245,11 +245,3 @@ ToolExecutor → MCP Server:  stdio JSON-RPC
 **Fix:** ToolExecutor serializes output to JSON before returning. Strip non-serializable fields.
 
 ---
-
-## Reference Implementation
-
-claw-code implements these in:
-- **ToolSpec:** `rust/crates/tools/src/lib.rs` — `ToolSpec` struct and built-in tool definitions
-- **ToolExecutor:** `rust/crates/tools/src/executor.rs`
-- **Registry:** `rust/crates/tools/src/registry.rs`
-- **Schema validation:** `rust/crates/tools/src/schema.rs`
