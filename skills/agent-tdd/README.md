@@ -449,9 +449,9 @@ See [specs/layer3-multiagent-tdd.md](specs/layer3-multiagent-tdd.md) for detaile
 
 ### Reference Materials
 
-- [references/llm-mocking.md](references/llm-mocking.md) — LLM mocking techniques
-- [references/contract-testing.md](references/contract-testing.md) — Contract testing for multi-agent systems
-- [references/test-patterns.md](references/test-patterns.md) — Common test patterns for agent systems
+- [references/test-fixtures.md](references/test-fixtures.md) — Test fixtures for agent systems
+- [references/mock-strategies.md](references/mock-strategies.md) — Mocking strategies for LLM and sub-agents
+- [references/anti-patterns.md](references/anti-patterns.md) — Anti-patterns in agent TDD
 
 ### Related Skills
 

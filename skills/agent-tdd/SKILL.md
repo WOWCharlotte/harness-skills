@@ -31,8 +31,11 @@ This skill complements the `harness` skill by providing testing strategies speci
 agent-tdd/
 ├── SKILL.md          # This file - entry point and overview
 ├── specs/           # Layer-specific TDD specifications
-│   ├── tools-tdd.md
-│   ├── loop-tdd.md
-│   └── multi-agent-tdd.md
+│   ├── layer1-tools-tdd.md
+│   ├── layer2-loop-tdd.md
+│   └── layer3-multiagent-tdd.md
 └── references/      # Reference materials and examples
+    ├── test-fixtures.md
+    ├── mock-strategies.md
+    └── anti-patterns.md
 ```
