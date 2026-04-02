@@ -4,6 +4,8 @@
 **Layer:** 2 of 4
 **Purpose:** Manages registration, discovery, execution, and permission control for all tools available in the system.
 
+> **⚡ Engineering Practices Available:** This specification describes the design in abstract. For concrete implementations, see [best practices](../references/best-practices/README.md) with code examples from claw-code.
+
 ---
 
 ## Components
@@ -138,6 +140,8 @@ ToolExecutorFactory {
   }
 }
 ```
+
+> **Engineering Practice:** See [tool-registry-impl.md](../references/best-practices/tool-registry-impl.md) for `ToolRegistry`, `ToolExecutor`, permission filtering, and `ExecutionRegistry` implementation patterns from claw-code.
 
 ### 2.3 Execution Context
 

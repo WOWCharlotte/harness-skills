@@ -4,6 +4,8 @@
 **Layer:** 4 of 4
 **Purpose:** Manages creation, state transfer, lifecycle, and collaboration patterns for sub-agents.
 
+> **⚡ Engineering Practices Available:** This specification describes the design in abstract. For concrete implementations, see [best practices](../references/best-practices/README.md).
+
 ---
 
 ## Components
@@ -114,6 +116,8 @@ type AgentToParentMessage =
   | { type: "needs_input", question: string, options?: string[] }
   | { type: "paused" }
 ```
+
+> **Engineering Practice:** See [multi-agent-impl.md](../references/best-practices/multi-agent-impl.md) for `AgentManager`, `AgentHandle`, session isolation, permission inheritance, async fork patterns, and collaboration pattern implementations.
 
 ### 4.4 Collaboration Patterns
 

@@ -4,6 +4,8 @@
 **Layer:** 3 of 4
 **Purpose:** Provides extensible interception mechanisms (Hooks) and modular packaging (Plugins) for extending harness behavior without modifying core code.
 
+> **⚡ Engineering Practices Available:** This specification describes the design in abstract. For concrete implementations, see [best practices](../references/best-practices/README.md).
+
 ---
 
 ## Components
@@ -125,6 +127,8 @@ class HookRunner {
   }
 }
 ```
+
+> **Engineering Practice:** See [hook-system-impl.md](../references/best-practices/hook-system-impl.md) for `HookRunner` implementation with error isolation, priority-based ordering, input modification chain, and built-in hooks pattern.
 
 #### Built-in Hooks
 
