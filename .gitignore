@@ -5,3 +5,12 @@ claude-code-system-prompts-main/
 
 # Generated files
 CLAUDE.md
+
+# Dependencies
+node_modules/
+packages/*/node_modules/
+packages/*/package-lock.json
+package-lock.json
+
+# Local Claude config
+.claude/settings.local.json
