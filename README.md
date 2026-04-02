@@ -69,6 +69,8 @@ Trigger the skill when:
 
 ```
 /harness
+/agent-tdd
+/agent-eval
 ```
 
 Or simply describe what you're working on — the skill activates automatically when relevant.
