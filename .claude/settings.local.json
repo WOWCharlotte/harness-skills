@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "mcp__drawio__create_new_diagram"
+      "mcp__drawio__create_new_diagram",
+      "Bash(git add:*)"
     ]
   }
 }

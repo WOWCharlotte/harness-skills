@@ -1,3 +1,7 @@
 # Cloned reference repositories
 claw-code-main/
 superpowers-main/
+claude-code-system-prompts-main/
+
+# Generated files
+CLAUDE.md
