@@ -49,7 +49,7 @@ Key components:
 - **Security** — pre-tool-use checks, injection prevention, principle of least privilege
 - **Hooks** — PreToolUse, PostToolUse, PermissionRequest, SessionStart events
 
-> Layer 0 lives in `specs/layer0-system-prompt.md` and `references/system-prompts/` (40+ reference files).
+> Layer 0 lives in `specs/layer0-system-prompt.md` with a complete mapping of all 140+ reference files organized by component.
 
 ---
 
@@ -328,7 +328,7 @@ This skill is a complete engineering workflow. Follow the Checklist in `SKILL.md
 - `specs/layer4-multi-agent.md` — Layer 4 detailed spec
 
 ### Reference Materials
-- `references/system-prompts/` — 40+ system prompt reference files
+- `references/system-prompts/` — 140+ system prompt reference files (organized in `layer0-system-prompt.md` by component)
 - `references/claw-code-patterns.md` — Source code mapping
 - `references/implementation-checklist.md` — Build checklist
 - `references/common-pitfalls.md` — Pitfalls and fixes

@@ -4,28 +4,31 @@ A skill for building production-grade Agent systems — derived from the claw-co
 
 ## What is this?
 
-This repository contains the **harness-engineering** skill — a complete 4-layer engineering methodology for designing, implementing, and evaluating Agent harness systems.
+This repository contains the **harness-engineering** skill — a complete 5-layer engineering methodology for designing, implementing, and evaluating Agent harness systems.
 
 The term **Harness** refers to the runtime system that surrounds an AI model (like Claude) and gives it capabilities: file access, shell execution, web search, task tracking, and the ability to spawn sub-agents.
 
 **Examples of Harnesses:** Claude Code, Cursor, Codex, OpenCode, claw-code.
 
-## The 4-Layer Architecture
+## The 5-Layer Architecture
 
 ```
-┌──────────────────────────────────────────────┐
-│ Layer 4: Multi-Agent                        │
-│ Agent Spawn / State Handoff / Collaboration  │
-├──────────────────────────────────────────────┤
-│ Layer 3: Plugin & Hooks                     │
-│ PreToolUse / PostToolUse / Lifecycle        │
-├──────────────────────────────────────────────┤
-│ Layer 2: Tool System                        │
-│ Tool Registry / Executor / Schema            │
-├──────────────────────────────────────────────┤
-│ Layer 1: Harness Core                       │
-│ Agent Loop / Session / Permissions           │
-└──────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────┐
+│ Layer 4: Multi-Agent                            │
+│ Agent Spawn / State Handoff / Collaboration     │
+├──────────────────────────────────────────────────┤
+│ Layer 3: Plugin & Hooks                         │
+│ PreToolUse / PostToolUse / Lifecycle            │
+├──────────────────────────────────────────────────┤
+│ Layer 2: Tool System                            │
+│ Tool Registry / Executor / Schema               │
+├──────────────────────────────────────────────────┤
+│ Layer 1: Harness Core                           │
+│ Agent Loop / Session / Permissions              │
+├──────────────────────────────────────────────────┤
+│ Layer 0: System Prompt                          │
+│ Tool Usage / Task Workflow / Fork Rules         │
+└──────────────────────────────────────────────────┘
 ```
 
 ## Skills
@@ -76,23 +79,26 @@ skills/
     ├── SKILL.md                          ← Skill entry point
     ├── README.md                          ← This file
     ├── specs/                             ← Detailed layer specs
-    │   ├── layer1-harness-core.md
-    │   ├── layer2-tool-system.md
-    │   ├── layer3-plugin-hooks.md
-    │   └── layer4-multi-agent.md
+    │   ├── layer0-system-prompt.md        ← Layer 0: System Prompt
+    │   ├── layer1-harness-core.md         ← Layer 1: Harness Core
+    │   ├── layer2-tool-system.md          ← Layer 2: Tool System
+    │   ├── layer3-plugin-hooks.md          ← Layer 3: Plugin & Hooks
+    │   └── layer4-multi-agent.md          ← Layer 4: Multi-Agent
     ├── diagrams/                           ← Architecture diagrams
     │   ├── architecture-overview.drawio
     │   ├── layer-breakdown.drawio
     │   └── data-flow.drawio
-    └── references/                        ← Reference docs
+    └── references/                         ← Reference docs
+        ├── system-prompts/                 ← 140+ prompt fragments
         ├── claw-code-patterns.md
         ├── implementation-checklist.md
-        └── common-pitfalls.md
+        ├── common-pitfalls.md
+        └── superpowers-installation.md
 ```
 
 ## References
 
-- [claw-code repository](https://github.com/instructkr/claw-code) — Source of the 4-layer architecture patterns
+- [claw-code repository](https://github.com/instructkr/claw-code) — Source of the architecture patterns
 - [Superpowers](https://github.com/obra/superpowers) — Workflow skills for coding agents
 
 ## License

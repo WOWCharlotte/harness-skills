@@ -201,7 +201,7 @@ LLMResponse {
 ```
 
 **API compatibility:**
-- **Anthropic API** (recommended): Native tool-use / tool-result message types. SSE streaming required for real-time tool execution feedback.
+- **Anthropic API** : Native tool-use / tool-result message types. SSE streaming required for real-time tool execution feedback.
 - **OpenAI-compatible API**: Tools must be converted to OpenAI function-calling format. Requires polling or streaming via Server-Sent Events.
 
 **Tool execution flow:**
