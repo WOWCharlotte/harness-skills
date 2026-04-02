@@ -1,11 +1,11 @@
-# Session Management 工程实践
+# Session Management Engineering Practice
 
-## 源码来源
+## Source
 
 - `claw-code-main/src/session_store.py::StoredSession`
 - `claw-code-main/src/query_engine.py::QueryEnginePort`
 
-## 核心实现
+## Core Implementation
 
 ### Immutable Session Data Model
 
@@ -18,7 +18,7 @@ class StoredSession:
     output_tokens: int
 ```
 
-**关键设计**: 使用 `frozen=True` dataclass + `tuple` 确保 Session 不可变。
+**Key Design**: Use `frozen=True` dataclass + `tuple` to ensure immutability.
 
 ### Session Persistence
 
@@ -37,20 +37,20 @@ def load_session(session_id: str, directory: Path | None = None) -> StoredSessio
     data = json.loads((target_dir / f'{session_id}.json').read_text())
     return StoredSession(
         session_id=data['session_id'],
-        messages=tuple(data['messages']),  # 恢复时转回 tuple
+        messages=tuple(data['messages']),  # restore as tuple
         input_tokens=data['input_tokens'],
         output_tokens=data['output_tokens'],
     )
 ```
 
-### QueryEnginePort 中的 Session 整合
+### QueryEnginePort Session Integration
 
 ```python
 class QueryEnginePort:
     manifest: PortManifest
     config: QueryEngineConfig = field(default_factory=QueryEngineConfig)
     session_id: str = field(default_factory=lambda: uuid4().hex)
-    mutable_messages: list[str] = field(default_factory=list)  # 运行时可变
+    mutable_messages: list[str] = field(default_factory=list)  # mutable at runtime
     permission_denials: list[PermissionDenial] = field(default_factory=list)
     total_usage: UsageSummary = field(default_factory=UsageSummary)
     transcript_store: TranscriptStore = field(default_factory=TranscriptStore)
@@ -62,7 +62,7 @@ class QueryEnginePort:
         return cls(
             manifest=build_port_manifest(),
             session_id=stored.session_id,
-            mutable_messages=list(stored.messages),  # 恢复为可变 list
+            mutable_messages=list(stored.messages),  # restore as mutable list
             total_usage=UsageSummary(stored.input_tokens, stored.output_tokens),
             transcript_store=transcript,
         )
@@ -72,7 +72,7 @@ class QueryEnginePort:
         path = save_session(
             StoredSession(
                 session_id=self.session_id,
-                messages=tuple(self.mutable_messages),  # 持久化时转不可变
+                messages=tuple(self.mutable_messages),  # convert to immutable for persistence
                 input_tokens=self.total_usage.input_tokens,
                 output_tokens=self.total_usage.output_tokens,
             )
@@ -80,32 +80,32 @@ class QueryEnginePort:
         return str(path)
 ```
 
-## 关键设计解读
+## Key Design Insights
 
-### 1. Runtime vs Persistence 状态分离
+### 1. Runtime vs Persistence State Separation
 
-| 阶段 | messages 类型 | 原因 |
-|-----|-------------|------|
-| Runtime | `list[str]` (可变) | 高频 append，效率优先 |
-| Persistence | `tuple[str, ...]` (不可变) | 序列化后不可变，保证 audit trail |
+| Phase | messages Type | Rationale |
+|-------|--------------|-----------|
+| Runtime | `list[str]` (mutable) | High-frequency append, efficiency priority |
+| Persistence | `tuple[str, ...]` (immutable) | Serialized state must be immutable for audit trail |
 
-### 2. Session Resume 流程
+### 2. Session Resume Flow
 
 ```python
-# 1. 创建新 Session
+# 1. Create new session
 engine = QueryEnginePort.from_workspace()
 
-# 2. 处理请求
+# 2. Process request
 result = engine.submit_message(prompt, ...)
 
-# 3. 持久化
+# 3. Persist
 path = engine.persist_session()
 
-# 4. 恢复时
+# 4. Resume later
 restored = QueryEnginePort.from_saved_session(session_id)
 ```
 
-### 3. Transcript Store 模式
+### 3. Transcript Store Pattern
 
 ```python
 class TranscriptStore:
@@ -124,9 +124,9 @@ class TranscriptStore:
         self.flushed = False
 ```
 
-## 适配建议
+## Adaptation Guide
 
-### Python 项目
+### Python Project
 
 ```python
 from dataclasses import dataclass, field
@@ -172,19 +172,19 @@ class SessionManager:
         )
 ```
 
-### Message Compaction 策略
+### Message Compaction Strategy
 
-当 session 过长时需要 compaction（见 `compact_messages_if_needed`）：
+When session grows too long, compaction is needed (see `compact_messages_if_needed`):
 
 ```python
 def compact_messages_if_needed(self) -> None:
     if len(self.mutable_messages) > self.config.compact_after_turns:
-        # 保留最近 N 条，丢弃早期消息
+        # Keep last N messages, discard earlier ones
         self.mutable_messages[:] = self.mutable_messages[-self.config.compact_after_turns:]
     self.transcript_store.compact(self.config.compact_after_turns)
 ```
 
-**注意**: Compaction 会丢失历史信息，适用于 context window 受限的场景。
+**Note**: Compaction loses historical information. Suitable when context window is limited.
 
 ## History Log (Audit Trail)
 
@@ -207,7 +207,7 @@ class HistoryLog:
         return '\n'.join(lines)
 ```
 
-使用示例:
+Usage example:
 
 ```python
 history = HistoryLog()
@@ -216,8 +216,8 @@ history.add('execution', f'command_execs={len(command_execs)} tool_execs={len(to
 history.add('turn', f'stop={turn_result.stop_reason}')
 ```
 
-## 注意事项
+## Key Takeaways
 
-1. **Session ID 使用 UUID**: 保证全局唯一性
-2. **持久化格式选择**: JSON 便于调试，MessagePack 效率更高
-3. **异步保存**: 生产环境应使用 async/background 写入，避免阻塞 loop
+1. **Use UUID for Session ID**: Ensures global uniqueness
+2. **Persistence format choice**: JSON for debuggability, MessagePack for efficiency
+3. **Async save in production**: Use async/background writes to avoid blocking the loop

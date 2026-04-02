@@ -1,10 +1,10 @@
-# Permission Enforcement 工程实践
+# Permission Enforcement Engineering Practice
 
-## 源码来源
+## Source
 
 `claw-code-main/src/permissions.py::ToolPermissionContext`
 
-## 核心实现
+## Core Implementation
 
 ```python
 @dataclass(frozen=True)
@@ -24,53 +24,53 @@ class ToolPermissionContext:
         return lowered in self.deny_names or any(lowered.startswith(prefix) for prefix in self.deny_prefixes)
 ```
 
-## 关键设计解读
+## Key Design Insights
 
-### 1. 两种拒绝模式
+### 1. Two Denial Modes
 
-| 模式 | 用途 | 示例 |
-|-----|------|-----|
-| `deny_names` | 精确匹配 | `['bash', 'shell_exec']` |
-| `deny_prefixes` | 前缀匹配 | `['dangerous_', 'admin_']` |
+| Mode | Use Case | Example |
+|------|----------|---------|
+| `deny_names` | Exact match | `['bash', 'shell_exec']` |
+| `deny_prefixes` | Prefix match | `['dangerous_', 'admin_']` |
 
-### 2. 大小写不敏感
+### 2. Case-insensitive Comparison
 
 ```python
 def blocks(self, tool_name: str) -> bool:
-    lowered = tool_name.lower()  # 统一转小写比较
+    lowered = tool_name.lower()  # normalize to lowercase
     return lowered in self.deny_names or any(lowered.startswith(prefix) for prefix in self.deny_prefixes)
 ```
 
-### 3. Permission Denial 跟踪
+### 3. Permission Denial Tracking
 
-在 `query_engine.py` 中集成 permission denial 跟踪：
+Integration in `query_engine.py`:
 
 ```python
 class QueryEnginePort:
     permission_denials: list[PermissionDenial] = field(default_factory=list)
 
     def submit_message(self, prompt: str, ...) -> TurnResult:
-        # ... 处理 ...
-        self.permission_denials.extend(denied_tools)  # 记录所有拒绝
+        # ... process ...
+        self.permission_denials.extend(denied_tools)  # track all denials
         return TurnResult(
-            permission_denials=denied_tools,  # 返回给调用方
+            permission_denials=denied_tools,  # return to caller
             ...
         )
 
-# Denial 模型
+# Denial model
 @dataclass(frozen=True)
 class PermissionDenial:
     tool_name: str
-    reason: str  # 拒绝原因，便于调试
+    reason: str  # reason for denial, aids debugging
 ```
 
-### 4. 在 Runtime 中使用
+### 4. Usage in Runtime
 
 ```python
 def _infer_permission_denials(self, matches: list[RoutedMatch]) -> list[PermissionDenial]:
     denials: list[PermissionDenial] = []
     for match in matches:
-        # 规则示例: 所有 bash 相关工具默认拒绝
+        # Rule example: all bash-related tools denied by default
         if match.kind == 'tool' and 'bash' in match.name.lower():
             denials.append(PermissionDenial(
                 tool_name=match.name,
@@ -79,9 +79,9 @@ def _infer_permission_denials(self, matches: list[RoutedMatch]) -> list[Permissi
     return denials
 ```
 
-## 适配建议
+## Adaptation Guide
 
-### Python 项目
+### Python Project
 
 ```python
 from dataclasses import dataclass, field
@@ -104,7 +104,7 @@ class PermissionContext:
         lowered = tool_name.lower()
         return lowered in self.deny_names or any(lowered.startswith(p) for p in self.deny_prefixes)
 
-# 权限检查集成到 Agent Loop
+# Permission check integrated into Agent Loop
 async def execute_with_permission(
     tool_call: ToolCall,
     ctx: PermissionContext,
@@ -118,7 +118,7 @@ async def execute_with_permission(
     return await tool_executor.execute(tool_call)
 ```
 
-### TypeScript 项目
+### TypeScript Project
 
 ```typescript
 interface PermissionContext {
@@ -143,9 +143,9 @@ function isBlocked(ctx: PermissionContext, toolName: string): boolean {
 }
 ```
 
-### Permission Modes 实现
+### Permission Modes Implementation
 
-规范中定义的 PermissionMode 可通过 PermissionContext 实现：
+PermissionMode defined in spec can be implemented via PermissionContext:
 
 ```python
 @dataclass(frozen=True)
@@ -155,18 +155,18 @@ class PermissionMode:
     DangerFullAccess = PermissionContext(deny_names=[])
 ```
 
-## 规范到实现的映射
+## Spec to Implementation Mapping
 
-| 规范定义 | claw-code 实现 |
-|---------|---------------|
+| Spec Definition | claw-code Implementation |
+|----------------|--------------------------|
 | PermissionMode enum | `ToolPermissionContext` |
 | `permit(session, tool_name)` | `ctx.blocks(tool_name)` |
 | tool_overrides | `deny_names` / `deny_prefixes` |
 | Permission denial tracking | `permission_denials: list[PermissionDenial]` |
 
-## 注意事项
+## Key Takeaways
 
-1. **默认拒绝**: 未明确允许的工具应默认拒绝
-2. **记录原因**: `PermissionDenial.reason` 必须填写，便于调试
-3. **大小写处理**: 工具名比较应忽略大小写
-4. **前缀匹配慎用**: `deny_prefixes` 可能误伤正常工具名
+1. **Default to denial**: Tools not explicitly allowed should be denied by default
+2. **Record reasons**: `PermissionDenial.reason` must be populated for debugging
+3. **Case handling**: Tool name comparison should be case-insensitive
+4. **Use prefix matching carefully**: `deny_prefixes` may accidentally block legitimate tools

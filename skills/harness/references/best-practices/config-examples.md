@@ -1,10 +1,10 @@
-# Config 工程实践
+# Config Engineering Practice
 
-## 源码来源
+## Source
 
 `claw-code-main/src/query_engine.py::QueryEngineConfig`
 
-## 核心实现
+## Core Implementation
 
 ```python
 @dataclass(frozen=True)
@@ -16,14 +16,14 @@ class QueryEngineConfig:
     structured_retry_limit: int = 2
 ```
 
-## 关键设计解读
+## Key Design Insights
 
 ### 1. Frozen Dataclass
 
-使用 `frozen=True` 确保配置不可变，防止运行期意外修改：
+Using `frozen=True` ensures config immutability, preventing accidental modification during runtime:
 
 ```python
-@dataclass(frozen=True)  # 不可变
+@dataclass(frozen=True)  # immutable
 class QueryEngineConfig:
     max_turns: int = 8
     # ...
@@ -34,15 +34,15 @@ config = QueryEngineConfig(max_turns=10)
 
 ### 2. Default Values
 
-合理的默认值减少调用方配置负担：
+Sensible defaults reduce caller configuration burden:
 
-| 配置项 | 默认值 | 说明 |
-|-------|--------|-----|
-| max_turns | 8 | 平衡深度和成本 |
-| max_budget_tokens | 2000 | 保守预算控制 |
-| compact_after_turns | 12 | 触发 compaction |
-| structured_output | False | 需显式开启 |
-| structured_retry_limit | 2 | 防止无限重试 |
+| Config | Default | Rationale |
+|--------|---------|-----------|
+| max_turns | 8 | Balance depth and cost |
+| max_budget_tokens | 2000 | Conservative budget control |
+| compact_after_turns | 12 | Trigger compaction |
+| structured_output | False | Requires explicit opt-in |
+| structured_retry_limit | 2 | Prevents infinite retry |
 
 ### 3. Turn Budget Tracking
 
@@ -53,7 +53,7 @@ class UsageSummary:
     output_tokens: int
 
     def add_turn(self, prompt: str, output: str) -> 'UsageSummary':
-        # 估算 token 数 (简化版)
+        # Simplified token estimation
         projected_input = self.input_tokens + len(prompt.split()) * 1.3
         projected_output = self.output_tokens + len(output.split()) * 1.3
         return UsageSummary(
@@ -65,9 +65,9 @@ class UsageSummary:
         return self.input_tokens + self.output_tokens
 ```
 
-## 适配建议
+## Adaptation Guide
 
-### Python 项目
+### Python Project
 
 ```python
 from dataclasses import dataclass, field
@@ -97,12 +97,12 @@ class SessionConfig:
     llm_retry_policy: RetryPolicy = field(default_factory=RetryPolicy)
 
     def with_overrides(self, **kwargs) -> 'SessionConfig':
-        """返回新配置，合并 overrides"""
+        """Return new config merged with overrides"""
         import dataclasses
         return dataclasses.replace(self, **kwargs)
 ```
 
-### TypeScript 项目
+### TypeScript Project
 
 ```typescript
 interface LLMConfig {
@@ -150,7 +150,7 @@ function withOverrides(base: SessionConfig, overrides: Partial<SessionConfig>): 
 }
 ```
 
-### Retry Policy 实现
+### Retry Policy Implementation
 
 ```python
 import asyncio
@@ -164,29 +164,29 @@ class RetryPolicy:
     max_delay_ms: int = 30000
 
 async def with_retry(policy: RetryPolicy, operation, *args, **kwargs):
-    """指数退避重试"""
+    """Exponential backoff retry"""
     delay_ms = policy.initial_delay_ms
     last_error = None
 
     for attempt in range(policy.max_attempts):
         try:
             return await operation(*args, **kwargs)
-        except (NetworkError, RateLimitError) as e:  # 可重试错误
+        except (NetworkError, RateLimitError) as e:  # retryable errors
             last_error = e
             if attempt < policy.max_attempts - 1:
                 await asyncio.sleep(delay_ms / 1000)
                 delay_ms = min(delay_ms * policy.backoff_multiplier, policy.max_delay_ms)
-        except (AuthError, PermissionError) as e:  # 不可重试错误
+        except (AuthError, PermissionError) as e:  # non-retryable errors
             raise
 
     raise last_error
 ```
 
-## LLM Config 与 Session Config 区别
+## LLM Config vs Session Config
 
-| 字段 | LLMConfig | SessionConfig |
-|------|-----------|---------------|
-| scope | 单次 LLM 调用 | 整个 Session |
+| Field | LLMConfig | SessionConfig |
+|-------|-----------|----------------|
+| scope | Single LLM call | Entire Session |
 | model | ✓ | ✓ |
 | temperature | ✓ | ✓ |
 | max_tokens | ✓ | ✗ |
@@ -194,18 +194,18 @@ async def with_retry(policy: RetryPolicy, operation, *args, **kwargs):
 | permissions | ✗ | ✓ |
 | retry_policy | ✗ | ✓ |
 
-## 规范到实现的映射
+## Spec to Implementation Mapping
 
-| 规范定义 | claw-code 实现 |
-|---------|---------------|
-| SessionConfig | `QueryEngineConfig` (简化版) |
+| Spec Definition | claw-code Implementation |
+|----------------|--------------------------|
+| SessionConfig | `QueryEngineConfig` (simplified) |
 | PermissionPolicy | `ToolPermissionContext` |
-| RetryPolicy | 需额外实现 |
-| LLMConfig | (未在 claw-code 中独立建模) |
+| RetryPolicy | (needs separate implementation) |
+| LLMConfig | (not independently modeled in claw-code) |
 
-## 注意事项
+## Key Takeaways
 
-1. **Frozen vs Mutable**: 配置用 `frozen=True`，运行时状态用普通 dataclass
-2. **Token 估算**: 生产环境应使用 tiktoken 等精确库
-3. **延迟初始化**: 某些配置项（如 working_dir）可在运行时解析
-4. **配置继承**: 使用 `with_overrides` 实现配置分层
+1. **Frozen vs Mutable**: Use `frozen=True` for config, regular dataclass for runtime state
+2. **Token estimation**: Production should use precise libraries like tiktoken
+3. **Lazy initialization**: Some config items (e.g., working_dir) can be resolved at runtime
+4. **Config inheritance**: Use `with_overrides` for config layering

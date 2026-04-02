@@ -1,10 +1,10 @@
-# Agent Loop 工程实践
+# Agent Loop Engineering Practice
 
-## 源码来源
+## Source
 
 `claw-code-main/src/runtime.py::PortRuntime.run_turn_loop`
 
-## 核心实现
+## Core Implementation
 
 ```python
 def run_turn_loop(self, prompt: str, limit: int = 5, max_turns: int = 3, structured_output: bool = False) -> list[TurnResult]:
@@ -23,7 +23,7 @@ def run_turn_loop(self, prompt: str, limit: int = 5, max_turns: int = 3, structu
     return results
 ```
 
-## 关键设计解读
+## Key Design Insights
 
 ### 1. Turn-based Loop with Explicit Termination
 
@@ -35,9 +35,9 @@ for turn in range(max_turns):
         break
 ```
 
-- **每次迭代前构造 Turn Prompt**: 第一轮用原始 prompt，后续轮次添加 `[turn N]` 标记
-- **显式 break 条件**: `stop_reason != 'completed'` 时提前终止
-- **max_turns 作为硬上限**: 防止无限循环
+- **Pre-iteration Turn Prompt Construction**: First round uses raw prompt, subsequent rounds append `[turn N]` marker
+- **Explicit Break Condition**: Terminate early when `stop_reason != 'completed'`
+- **max_turns as Hard Ceiling**: Prevents infinite loops
 
 ### 2. Budget-aware Termination (query_engine.py)
 
@@ -60,10 +60,10 @@ def submit_message(self, prompt: str, ...) -> TurnResult:
     return TurnResult(..., stop_reason=stop_reason)
 ```
 
-**Termination Conditions 对应关系**:
+**Termination Conditions Mapping**:
 
-| 规范定义 | claw-code 实现 |
-|---------|---------------|
+| Spec Definition | claw-code Implementation |
+|----------------|-------------------------|
 | LLM returns finish signal | `stop_reason = 'completed'` |
 | max_turns limit reached | `stop_reason = 'max_turns_reached'` |
 | Budget exhausted | `stop_reason = 'max_budget_reached'` |
@@ -73,18 +73,18 @@ def submit_message(self, prompt: str, ...) -> TurnResult:
 
 ```python
 class QueryEnginePort:
-    mutable_messages: list[str] = field(default_factory=list)  # 内部可变
+    mutable_messages: list[str] = field(default_factory=list)  # mutable internally
 
     def submit_message(self, prompt: str, ...) -> TurnResult:
         # ... compute result ...
-        self.mutable_messages.append(prompt)  # 总是 append，不修改历史
-        self.transcript_store.append(prompt)  # 独立 transcript
+        self.mutable_messages.append(prompt)  # always append, never modify history
+        self.transcript_store.append(prompt)  # separate transcript
         return TurnResult(...)
 ```
 
-## 适配建议
+## Adaptation Guide
 
-### Python 项目
+### Python Project
 
 ```python
 from dataclasses import dataclass, field
@@ -128,7 +128,7 @@ async def run_agent_loop(
     return TurnResult('', 'max_turns', total_usage)
 ```
 
-### TypeScript 项目
+### TypeScript Project
 
 ```typescript
 interface TurnResult {
@@ -171,8 +171,8 @@ async function runAgentLoop(
 }
 ```
 
-## 注意事项
+## Key Takeaways
 
-1. **不要在循环内修改 messages 历史**: append only，保证 audit trail
-2. **预算检查在调用前**: 防止超支后再检查已经太晚
-3. **stop_reason 必须枚举所有情况**: 便于调试和监控
+1. **Never modify message history inside the loop**: Append only to preserve audit trail
+2. **Budget check before call**: Checking after overspend is too late
+3. **stop_reason must enumerate all cases**: Enables debugging and monitoring
