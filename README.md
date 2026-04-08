@@ -41,22 +41,37 @@ The term **Harness** refers to the runtime system that surrounds an AI model (li
 
 ## Installation
 
-### Claude Code
+### Claude Code — Marketplace (Recommended)
 
+Add the marketplace first, then install the plugin:
+
+```bash
+# Add marketplace
+/plugin marketplace add WOWCharlotte/harness-skills
+
+# Install plugin from marketplace
+/plugin install harness-engineering@WOWCharlotte/harness-skills
 ```
+
+### Claude Code — Direct URL
+
+Install directly via GitHub URL:
+
+```bash
 /plugin install harness-engineering@https://github.com/WOWCharlotte/harness-skills
 ```
 
-Or install from a local clone:
+### Local Clone
 
-```
+```bash
 git clone https://github.com/WOWCharlotte/harness-skills
 /plugin install harness-engineering@./harness-skills
+/plugin reload-plugins
 ```
 
-### Manual
+### Manual Installation
 
-Copy the `skills/harness/` directory to your agent's skills directory:
+Copy the `skills/` directory to your agent's skills directory:
 - Claude Code: `~/.claude/skills/`
 - Codex: `~/.agents/skills/`
 
@@ -78,26 +93,26 @@ Or simply describe what you're working on — the skill activates automatically 
 ## Repository Structure
 
 ```
-skills/
-└── harness/
-    ├── SKILL.md                          ← Skill entry point
-    ├── README.md                          ← This file
-    ├── specs/                             ← Detailed layer specs
-    │   ├── layer0-system-prompt.md        ← Layer 0: System Prompt
-    │   ├── layer1-harness-core.md         ← Layer 1: Harness Core
-    │   ├── layer2-tool-system.md          ← Layer 2: Tool System
-    │   ├── layer3-plugin-hooks.md          ← Layer 3: Plugin & Hooks
-    │   └── layer4-multi-agent.md          ← Layer 4: Multi-Agent
-    ├── diagrams/                           ← Architecture diagrams
-    │   ├── architecture-overview.drawio
-    │   ├── layer-breakdown.drawio
-    │   └── data-flow.drawio
-    └── references/                         ← Reference docs
-        ├── system-prompts/                 ← 140+ prompt fragments
-        ├── claw-code-patterns.md
-        ├── implementation-checklist.md
-        ├── common-pitfalls.md
-        └── superpowers-installation.md
+harness-skills/
+├── .claude-plugin/
+│   ├── plugin.json                       ← Plugin manifest
+│   └── marketplace.json                   ← Marketplace definition
+├── skills/
+│   ├── harness/                          ← Harness Engineering skill
+│   │   ├── SKILL.md                      ← Skill entry point
+│   │   ├── specs/                        ← Layer specifications
+│   │   │   ├── layer0-system-prompt.md
+│   │   │   ├── layer1-harness-core.md
+│   │   │   ├── layer2-tool-system.md
+│   │   │   ├── layer3-plugin-hooks.md
+│   │   │   └── layer4-multi-agent.md
+│   │   ├── diagrams/                     ← Architecture diagrams
+│   │   └── references/                   ← Reference docs
+│   ├── agent-tdd/                        ← Agent TDD skill
+│   └── agent-eval/                       ← Agent Eval skill
+├── commands/                             ← Slash commands
+├── CLAUDE.md                             ← Claude Code instructions
+└── GEMINI.md                             ← Gemini CLI entry point
 ```
 
 ## References
