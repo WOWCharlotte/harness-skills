@@ -44,14 +44,14 @@ The term **Harness** refers to the runtime system that surrounds an AI model (li
 ### Claude Code
 
 ```
-/plugin install harness@https://github.com/WOWCharlotte/harness-skills
+/plugin install harness-engineering@https://github.com/WOWCharlotte/harness-skills
 ```
 
 Or install from a local clone:
 
 ```
 git clone https://github.com/WOWCharlotte/harness-skills
-/plugin install harness@./harness-skills
+/plugin install harness-engineering@./harness-skills
 ```
 
 ### Manual
