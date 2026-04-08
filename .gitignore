@@ -4,7 +4,6 @@ superpowers-main/
 claude-code-system-prompts-main/
 
 # Generated files
-CLAUDE.md
 
 # Dependencies
 node_modules/
