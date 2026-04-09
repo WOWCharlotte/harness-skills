@@ -120,6 +120,61 @@ harness-skills/
 - [claw-code repository](https://github.com/instructkr/claw-code) — Source of the architecture patterns
 - [Superpowers](https://github.com/obra/superpowers) — Workflow skills for coding agents
 
+
+## Roadmap
+
+This project is organized into three phases:
+
+#### Phase 1: Harness Skill Initialization ✅ (Completed)
+
+Built the core Harness Engineering skill system:
+
+- [✅️] 5-layer architecture specification (Layer 0-4)
+- [✅️] Best practices reference implementations
+- [✅️] Architecture diagrams
+- [✅️] CLAUDE.md / GEMINI.md entry points
+
+**Outcome**: Established a complete Agent system engineering methodology covering full-stack design from System Prompt to Multi-Agent.
+
+#### Phase 2: Benchmark Validation
+
+Use Harness Skill to improve open-source Agents and validate the methodology:
+
+- [ ] **SWE-bench**: Software engineering task benchmark
+- [ ] **Terminal Bench**: Terminal operation task benchmark
+- [ ] **Other open-source Benchmark**
+
+**Goal**: Validate the methodology through real projects and solve practical Agent system engineering challenges.
+
+#### Phase 3: Ecosystem Expansion
+
+Refine and expand the skill ecosystem based on practical feedback:
+
+- [ ] Complete agent-tdd skill
+- [ ] Complete agent-eval skill
+- [ ] Expand hooks and plugins ecosystem
+- [ ] Enrich best practices case library
+
+## Ways to Contribute
+
+**Issues**: Bug reports, feature suggestions, and architecture discussions are welcome.
+
+**Pull Requests**:
+- Improve existing specification documents
+- Add best practices case studies
+- Refine architecture diagrams and code examples
+- Fix errors or omissions in documentation
+
+**Major Changes**: For changes involving architecture adjustments, please open an Issue to discuss direction before implementing.
+
+---
+
+## References
+
+- [claw-code repository](https://github.com/instructkr/claw-code) — Architecture patterns source code
+- [Superpowers](https://github.com/obra/superpowers) — Workflow skills for coding agents
+- [Claude Code Source Code Analysis](https://mp.weixin.qq.com/s/GjZ-tFBVwfJwK11F1lP5TQ) — 510K lines TypeScript deep dive (by yzddMr6)
+
 ## License
 
 MIT
