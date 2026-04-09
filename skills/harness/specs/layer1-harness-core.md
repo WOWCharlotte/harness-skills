@@ -319,7 +319,7 @@ PermissionPolicy {
 
 #### Six Permission Modes (Trust Spectrum)
 
-The permission mode is a user's global declaration of trust level in AI. A continuous spectrum from "完全不信任" to "完全信任":
+The permission mode is a user's global declaration of trust level in AI. A continuous spectrum from "complete distrust" to "complete trust":
 
 | Mode | Behavior | Use Case |
 |------|----------|----------|

@@ -17,6 +17,40 @@ A well-designed system prompt ensures:
 - Security monitoring integration
 - Hook-based extensibility
 
+### Context Engineering vs Prompt Engineering
+
+**Core philosophy**: Not "write a prompt telling the model who it is", but **carefully assemble complete contextual environment in each turn of conversation** — segment caching, dynamic injection, multi-layer compression.
+
+System prompt is not a single giant string, but a `string[]` array, each element an independent "paragraph". This design's core motivation is **prompt cache** — Anthropic API supports caching system prompt prefix, avoiding re-processing same content every turn.
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  SYSTEM_PROMPT_DYNAMIC_BOUNDARY                              │
+└──────────────────────────────────────────────────────────────┘
+                          │
+         ┌────────────────┴────────────────┐
+         ▼                                 ▼
+┌─────────────────────┐        ┌─────────────────────────────┐
+│  Static Region      │        │  Dynamic Region              │
+│  (scope: 'global')  │        │  (user/session-specific)    │
+│                     │        │                             │
+│  • Tool descriptions│        │  • CLAUDE.md injection      │
+│  • Agent identity    │        │  • Git state injection      │
+│  • Core behavioral  │        │  • MCP instructions delta   │
+│    directives        │        │  • Session-specific context │
+│                     │        │                             │
+│  Cache: GLOBAL       │        │  Cache: CANNOT share across │
+│  (all users share   │        │  users                      │
+│   same cache)        │        │                             │
+└─────────────────────┘        └─────────────────────────────┘
+```
+
+**DANGEROUS_uncachedSystemPromptSection naming** is intentional — it forces developers to provide `_reason` parameter explaining why cache must be broken every time it's used. This is "code as documentation": function signature itself is a review mechanism.
+
+### Internal/External Differentiation
+
+Internal Anthropic users see additional instructions, including stricter comment conventions ("Default to writing no comments") and honest reporting requirements. Comment references internal evaluation data: 29-30% false claim rate (Capybara v8). This is an engineering countermeasure against known LLM weakness.
+
 ## 1. Tool Usage Patterns
 
 ### 1.1 Core Tool Categories
@@ -35,7 +69,18 @@ A well-designed system prompt ensures:
 3. **Tool timeout required** — All bash commands must have timeout consideration
 4. **Permission boundaries** — File operations must respect permission model
 
-### 1.3 Error Handling Patterns
+**Why prefer specific tools?** Specialized tool output is easier to review (security consideration) and has built-in permission checking (Bash permission checking is much more complex).
+
+### 1.3 Minimization Principle
+
+**Critical principle**: "Three similar lines of code is better than a premature abstraction." This is not a style preference, but an **engineering countermeasure against LLM's known tendency to "over-engineer"** — needs explicit constraints to suppress.
+
+Instructions repeatedly emphasize "don't overdo":
+- Don't add features not requested
+- Don't design for hypothetical future needs
+- Don't create one-off abstractions
+
+### 1.4 Error Handling Patterns
 
 ```
 Tool Error Response {
@@ -79,51 +124,84 @@ Every task implementation follows this sequence:
 2. **Prefer action over planning** — Start coding unless explicitly asked for plan
 3. **Course corrections welcome** — User feedback is normal input
 
-## 3. Fork & Subagent Patterns
+### 2.4 Authorization is Non-Transitive
 
-### 3.1 When to Fork
+**Critical principle**: "A user approving an action once does NOT mean that they approve it in all contexts."
 
-**Fork (lightweight, context-sharing):**
-- Research tasks with independent questions
-- Implementation requiring multiple edits
-- Parallel exploration of alternatives
-
-**Subagent (heavyweight, isolated):**
-- Complex tasks needing full isolation
-- Different model requirements
-- Long-running tasks that shouldn't pollute main context
-
-### 3.2 Fork Rules
-
-| Rule | Rationale |
-|------|-----------|
-| Don't peek | Trust completion notification; reading mid-flight pollutes context |
-| Don't race | Never predict or fabricate fork results |
-| Don't set model | Different model can't reuse parent's cache |
-| Pass short name | Enable user steering via teams panel |
-
-### 3.3 Subagent Prompt Guidelines
-
-**Context-inheriting subagents:**
-- Directive prompt: what to do, not what's the situation
-- Be specific about scope: what's in, what's out
-- Don't re-explain background already in context
-
-**Fresh subagents:**
-- Include full context needed
-- State assumptions explicitly
-- Provide all relevant files/paths
+This prevents model from over-generalizing from one approval — user allowing one `git push` doesn't mean all future `git push` are automatically allowed.
 
 ## 4. Context Compaction
 
-### 4.1 When to Compact
+### 4.1 Four-Layer Compression Strategy
+
+As conversation grows longer, context window becomes scarce resource. Claude Code implements four-layer compression strategy from light to heavy:
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  Layer 1: Context Collapse (Lightest)                        │
+│     - Progressive message folding based on importance         │
+│     - Recently referenced messages stay intact                │
+│     - Older messages gradually condensed                     │
+│     - Preserves fine-grained context                         │
+└──────────────────────────────────────────────────────────────┘
+                          ▼
+┌──────────────────────────────────────────────────────────────┐
+│  Layer 2: AutoCompact (Heavy - requires API call)           │
+│     - Full summary when threshold reached                    │
+│     - Threshold: effective_window - 13000 tokens           │
+│     - For 200k context models: triggers at ~167k tokens     │
+│     - Circuit breaker: stops after 3 consecutive failures   │
+│       (analytics: ~1,279 sessions had 50+ failures,         │
+│        wasting ~250K API calls/day globally)               │
+└──────────────────────────────────────────────────────────────┘
+                          ▼
+┌──────────────────────────────────────────────────────────────┐
+│  Layer 3: Context Collapse + AutoCompact mutual exclusion   │
+│     - When Context Collapse enabled, proactive AutoCompact  │
+│       is suppressed                                          │
+│     - AutoCompact's "full summary" destroys fine-grained   │
+│       context that Collapse preserves                         │
+│     - Collapse is gradual (folds by importance), AutoCompact │
+│       is abrupt (full compression)                           │
+└──────────────────────────────────────────────────────────────┘
+                          ▼
+┌──────────────────────────────────────────────────────────────┐
+│  Layer 4: Reconstruction Phase                               │
+│     - After compression, re-inject key file contents        │
+│     - Max 5 key files × 5000 tokens each                    │
+│     - Skill instructions: max 25000 tokens                   │
+│     - Ensures model can still "see" most important files    │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Why "light to heavy" order?** AutoCompact requires a full API call to generate summary, expensive and destroys fine-grained context. If lighter operations already freed enough space, AutoCompact can be avoided.
+
+### 4.2 AutoCompact Summary Prompt: 9-Category Information Retention
+
+The summary prompt is carefully designed to retain 9 categories of information:
+
+| # | Category | What to Preserve | Why |
+|---|----------|------------------|-----|
+| 1 | User Request | Core request and intent | Must know what task is |
+| 2 | Technical Concepts | Key technical concepts involved | Foundation for decisions |
+| 3 | Files/Code | Files and code snippets | Actual work products |
+| 4 | Errors/Fixes | Errors encountered and fixes | Knowledge for future similar issues |
+| 5 | Problem Solving | Problem-solving process | Enables informed next steps |
+| 6 | User Messages | ALL user messages (not tool results) | User feedback critical — easy to lose in compression |
+| 7 | Todo Tasks | Pending tasks | Maintain work queue |
+| 8 | Current Work | What's being worked on | Immediate context |
+| 9 | Next Steps | Specific next actions | Maintain momentum |
+
+**Special note on #6**: "ALL user messages that are not tool results" — this is an **engineering countermeasure against LLM's tendency to lose user feedback in compression**. If "user said don't use Redux" is lost after compression, model might introduce Redux in subsequent conversation.
+
+### 4.3 When to Compact
 
 Compact context at logical intervals:
 - After completing a task phase
 - Before starting a new significant task
 - When context reaches 60-70% capacity
 
-### 4.2 Structured Summary Format
+### 4.4 Structured Summary Format
 
 ```markdown
 <summary>
@@ -153,11 +231,12 @@ Compact context at logical intervals:
 </summary>
 ```
 
-### 4.3 Compaction Principles
+### 4.5 Compaction Principles
 
 1. **Concise but complete** — Include info that prevents duplicate work
 2. **Actionable** — Enable immediate resumption
 3. **Preserve decisions** — Document rationale, not just outcomes
+4. **Preserve user feedback** — ALL user messages must be retained (not just tool results)
 
 ## 5. Security Monitoring
 
