@@ -14,6 +14,30 @@
 
 Central registry of all available tools. Tools register themselves by declaring a ToolSpec.
 
+#### Tool Interface: Six Functional Groups
+
+The `Tool` interface is a generic interface with 30+ methods, divided into six functional groups:
+
+| Group | Methods | Purpose |
+|-------|---------|---------|
+| **Metadata** | `name`, `description`, `input_schema` | Tool identification for LLM |
+| **Capability** | `isConcurrencySafe`, `isReadOnly`, `isDestructive` | Execution properties |
+| **Permission** | `requiredPermission`, `checkPermissions` | Security attributes |
+| **Execution** | `execute`, `validate`, `getTimeout` | Tool invocation |
+| **UI** | `render`, `getShortDescription` | User-facing presentation |
+| **Lifecycle** | `onRegister`, `onUnregister` | Registration hooks |
+
+**Key attribute default values** (via `buildTool` factory):
+
+| Attribute | Default | Design Rationale |
+|-----------|---------|------------------|
+| `isConcurrencySafe` | `false` | Assume cannot parallelize, prevents concurrency bugs |
+| `isReadOnly` | `false` | Assume will write, triggers stricter permission checks |
+| `isDestructive` | `false` | Don't assume destructive, avoids excessive warnings |
+| `checkPermissions` | `allow` | Default to allow, external permission system provides safety net |
+
+**Design rationale for defaults**: Concurrency and read-only attributes are fail-closed (conservative); permission checking is fail-open (permissive). Reason: concurrency conflicts and accidental writes are internal tool issues the tool must handle; permission judgment has external multi-layer defense system as safety net.
+
 #### ToolSpec Model
 
 ```typescript
@@ -24,6 +48,15 @@ interface ToolSpec {
   required_permission: PermissionMode  // Minimum permission to run this tool
   categories: string[]             // Optional: ["filesystem", "network", "agent"]
   deprecation_warning?: string     // Optional: if set, LLM sees this warning
+
+  // Execution properties
+  isConcurrencySafe: boolean      // Can this tool run in parallel with itself?
+  isReadOnly: boolean              // Does this tool modify state?
+  isDestructive: boolean           // Can this tool cause irreversible damage?
+  getTimeout?: () => number        // Optional timeout override
+
+  // Safety
+  checkPermissions: 'allow' | 'deny' | 'ask'  // Default permission check behavior
 }
 
 interface JSONSchema {
@@ -41,32 +74,35 @@ interface PropertySchema {
 }
 ```
 
-#### Registration
+#### Registration with Three Loading Strategies
 
-Tools register at startup (built-in) or at runtime (plugins/MCP):
+Tool registry assembles available tools based on current environment using three loading strategies:
 
 ```
-ToolRegistry {
-  tools: Map<ToolName, ToolSpec>
-  categories: Map<Category, ToolName[]>
-
-  register(spec: ToolSpec) {
-    if (tools.has(spec.name)) {
-      throw DuplicateToolError(spec.name)
-    }
-    tools.set(spec.name, spec)
-    for (cat in spec.categories) {
-      categories.get_or_insert(cat, []).push(spec.name)
-    }
-  }
-
-  get(name: ToolName) → ToolSpec | undefined
-
-  list_by_category(cat: Category) → ToolSpec[]
-
-  list_all() → ToolSpec[]
-}
+┌──────────────────────────────────────────────────────────────┐
+│  1. Built-in Tools                                          │
+│     - Compiled into binary                                   │
+│     - Always available                                       │
+└──────────────────────────────────────────────────────────────┘
+                          ▼
+┌──────────────────────────────────────────────────────────────┐
+│  2. Feature-Gated Tools (compile-time elimination)          │
+│     - Bundled but conditionally loaded via feature() macro  │
+│     - When feature flag is false, require() branch removed  │
+│       at build time — not just skipped, but doesn't exist   │
+│       in final bundle                                        │
+│     - WHY require() instead of import(): dynamic require     │
+│       can be conditionally wrapped, static import cannot    │
+└──────────────────────────────────────────────────────────────┘
+                          ▼
+┌──────────────────────────────────────────────────────────────┐
+│  3. Plugin/MCP Tools (runtime discovery)                     │
+│     - Discovered at runtime from plugins or MCP servers     │
+│     - Dynamically registered without restart                │
+└──────────────────────────────────────────────────────────────┘
 ```
+
+**Tool pool assembly (`assembleToolPool`)**: Merges built-in and MCP tools using **partitioned sorting** — built-in tools sorted first by name, MCP tools sorted after by name, two groups do not interleave. Reason: server-side prompt cache strategy places cache breakpoints after the last built-in tool; if MCP tools insert among built-in tools, cache invalidates.
 
 #### What the LLM Sees
 
@@ -88,6 +124,41 @@ The LLM receives only the ToolSpec — name, description, and input_schema. Neve
 ### 2.2 Tool Executor
 
 Pluggable execution engine. Implements the `ToolExecutor` trait.
+
+#### Streaming vs Batch Execution
+
+When model returns multiple tool calls simultaneously (e.g., reading 3 files), two execution modes exist:
+
+| Mode | Behavior | Latency | Complexity |
+|------|----------|---------|------------|
+| **Batch Execution** | Wait for all tool_use blocks to arrive, execute sequentially | Higher (first Read waits for last tool_use block) | Simple |
+| **Streaming Execution** (default) | Execute immediately as each tool_use block arrives | Lower | Requires concurrency control |
+
+**Concurrency Control Model**:
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  Tool A (isConcurrencySafe=true) ──┐                        │
+│  Tool B (isConcurrencySafe=true) ──┼── Parallel Partition 1  │
+│  Tool C (isConcurrencySafe=true) ──┘                        │
+└──────────────────────────────────────────────────────────────┘
+                          ▼ (serial between partitions)
+┌──────────────────────────────────────────────────────────────┐
+│  Tool D (isConcurrencySafe=false) ──── Partition 2            │
+└──────────────────────────────────────────────────────────────┘
+                          ▼
+┌──────────────────────────────────────────────────────────────┐
+│  Tool E (isConcurrencySafe=true) ──── Partition 3            │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Rules**:
+- Each tool declares via `isConcurrencySafe(input)` whether it can run in parallel
+- Consecutive concurrency-safe tools form a "parallel partition"
+- Partitions execute serially; within a partition, tools execute in parallel
+- If `isConcurrencySafe` throws exception (input parse failure), default to unsafe (fail-closed)
+
+**Why FileRead is concurrency-safe but FileEdit is NOT?** Two parallel FileEdits may edit different positions in the same file, causing line offset conflicts and race conditions. FileRead is read-only, naturally conflict-free.
 
 #### Trait Definition
 
@@ -112,8 +183,15 @@ interface ToolResult {
     elapsed_ms: number
     cache_hit?: boolean
   }
+
+  // Some tools need to modify subsequent tool context
+  // (e.g., change working directory) but cannot mutate global state
+  // Only applies to non-concurrency-safe tools
+  contextModifier?: ContextModifier
 }
 ```
+
+**`contextModifier`**: Provides controlled way to modify subsequent tool context. Only effective for non-concurrency-safe tools — concurrent tools cannot modify each other's context.
 
 #### Built-in Executors
 
@@ -155,6 +233,14 @@ interface ExecutionContext {
   tool_results_cache: Map<string, CachedResult>
   permission_mode: PermissionMode  // Current effective mode
   trace_id: string              // For logging correlation
+
+  // Tool-specific context (40+ fields total)
+  readFileState: Map<string, FileReadState>    // Track which files FileReadTool has read
+  abortController: AbortController              // For cancelling long-running operations
+  setToolJSX?: (component: JSX.Element) => void // UI render callback for progress
+  agentId: string                              // Sub-agent identifier
+  contentReplacementState: ContentBudget       // Token budget control
+  updateFileHistoryState: FileHistory          // For /rewind support
 }
 ```
 
@@ -176,6 +262,100 @@ interface ExecutionContext {
 | **agent** | Agent, forkSubagent, runAgent, resumeAgent | DangerFullAccess |
 | **meta** | Skill, MCPTool | ReadOnly |
 | **mcp** | * (dynamic from MCP servers) | Varies by server |
+
+### 2.5 BashTool: Security Fortress
+
+BashTool is the most complex single tool (18 files). Complexity arises from fundamental contradiction: **shell command expressiveness is nearly unlimited, but security constraints must be strict**.
+
+#### Eight-Layer Security Checks
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  Layer 1: Permission Check                                   │
+│  - Match against allowlist/denylist patterns               │
+│  - Prefix matching: Bash(cd:*)                              │
+└──────────────────────────────────────────────────────────────┘
+                          ▼
+┌──────────────────────────────────────────────────────────────┐
+│  Layer 2: Tree-sitter AST Parsing                           │
+│  - Parse compound commands into SimpleCommand AST           │
+│  - Each sub-command checked independently                   │
+│  - Any sub-command denied → entire command denied           │
+└──────────────────────────────────────────────────────────────┘
+                          ▼
+┌──────────────────────────────────────────────────────────────┐
+│  Layer 3: Sub-command Count Limit                            │
+│  - Max 50 sub-commands per compound command                 │
+│  - Prevents ReDoS and event loop starvation                 │
+└──────────────────────────────────────────────────────────────┘
+                          ▼
+┌──────────────────────────────────────────────────────────────┐
+│  Layer 4: Flag-level Validation                              │
+│  - Not just command name, validate each flag's value type   │
+│  - Example: xargs -I vs -i have different semantics         │
+│    -i has optional parameter GNU implementation            │
+│    can be exploited for arbitrary command execution          │
+│  - Whitelist defines allowed value types per flag            │
+└──────────────────────────────────────────────────────────────┘
+                          ▼
+┌──────────────────────────────────────────────────────────────┐
+│  Layer 5: Command Injection Detection (bashSecurity.ts)     │
+│  - 25+ checks covering:                                     │
+│    - Command substitution: $(), backticks                   │
+│    - Process substitution: <(), >()                         │
+│    - Parameter substitution: ${}                            │
+│    - Zsh-specific dangerous commands: zmodload, syswrite   │
+│    - Control characters, Unicode whitespace                  │
+└──────────────────────────────────────────────────────────────┘
+                          ▼
+┌──────────────────────────────────────────────────────────────┐
+│  Layer 6: Sandbox Mechanism                                  │
+│  - SandboxManager restricts:                                │
+│    - Filesystem read/write paths                            │
+│    - Network access hosts                                   │
+│    - Unix socket access                                     │
+│  - Commands without matching allow rule CAN execute         │
+│    inside sandbox, but deny/ask rules still take priority  │
+│  - Sandbox is "safety net", not "get out of jail free"     │
+└──────────────────────────────────────────────────────────────┘
+                          ▼
+┌──────────────────────────────────────────────────────────────┐
+│  Layer 7: Timeout & Resource Limits                          │
+│  - Mandatory timeout on all bash commands                   │
+│  - Memory and CPU limits (ulimit or container cgroups)     │
+└──────────────────────────────────────────────────────────────┘
+                          ▼
+┌──────────────────────────────────────────────────────────────┐
+│  Layer 8: Output Filtering                                   │
+│  - Strip sensitive data from output before returning        │
+│  - Trap command detection (Ctrl+C)                         │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### 2.6 FileEditTool: Search-Replace Safety
+
+FileEditTool implements "search-replace" file editing pattern.
+
+**Core invariant**: `old_string` must uniquely match in file. If multiple matches exist, edit fails and requires more context. This constraint seems strict but avoids "edited wrong location" catastrophic errors.
+
+**Critical safety invariant**: **Cannot edit unread files**. `readFileState` cache tracks which files FileReadTool has read. If model attempts to edit unread file, system refuses with prompt to read first. This prevents model from "editing by memory" — it must see file's current state.
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  FileEditTool.execute(input, ctx)                           │
+│     │                                                        │
+│     ▼                                                        │
+│  1. Validate old_string uniquely matches in file            │
+│     │ (fail if multiple matches)                            │
+│     ▼                                                        │
+│  2. Check readFileState: was file read by FileReadTool?     │
+│     │ (fail if not read)                                    │
+│     ▼                                                        │
+│  3. Apply replacement                                        │
+│     ▼                                                        │
+│  4. Return result                                            │
+└──────────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -223,6 +403,9 @@ ToolExecutor → MCP Server:  stdio JSON-RPC
 - [ ] **LLM-facing description quality:** Every tool description passes the "could an LLM correctly choose this tool?" test
 - [ ] **Idempotency:** Tool results are cacheable by input hash; duplicate calls return cached result
 - [ ] **Isolation:** Bash tools run in subprocess, not in main process, to prevent crashes
+- [ ] **Concurrency safety declaration:** Each tool explicitly declares isConcurrencySafe
+- [ ] **Read-before-edit enforcement:** FileEditTool verifies readFileState before execution
+- [ ] **contextModifier safety:** Context modifications only allowed for non-concurrent tools
 
 ---
 
@@ -247,5 +430,13 @@ ToolExecutor → MCP Server:  stdio JSON-RPC
 ### 5. Non-serializable Tool Results
 **Problem:** Tool returns closure, socket, or circular-reference object that can't be sent to LLM.
 **Fix:** ToolExecutor serializes output to JSON before returning. Strip non-serializable fields.
+
+### 6. Parallel Edit Conflicts
+**Problem:** Two concurrent FileEditTools edit same file different positions → line offset conflicts.
+**Fix:** FileEditTool is NOT concurrency-safe. StreamingToolExecutor serializes edits to same file.
+
+### 7. Edit by Memory
+**Problem:** Model edits file without reading current content → stale state editing.
+**Fix:** FileEditTool enforces readFileState check. Model must read file before editing.
 
 ---

@@ -14,6 +14,21 @@
 
 Hooks intercept tool execution at defined points. Two types: PreToolUse (before) and PostToolUse (after).
 
+#### Hook Event Types
+
+| Event | Timing | Can Block? | Can Modify Input? | Available Hook Types |
+|-------|--------|------------|-------------------|---------------------|
+| `PermissionRequest` | Before permission prompt | Yes | No | command, prompt, agent |
+| `PreToolUse` | Before tool execution | Yes | Yes | command, prompt, agent |
+| `PostToolUse` | After successful tool | No | Yes (output) | command, prompt, agent |
+| `PostToolUseFailure` | After tool failure | No | Yes (error) | command |
+| `Notification` | On notifications | N/A | N/A | command |
+| `Stop` | When session ends | N/A | N/A | command |
+| `PreCompact` | Before compaction | Yes | Yes | command |
+| `PostCompact` | After compaction | No | Yes | command |
+| `UserPromptSubmit` | When user submits | Yes | Yes | command |
+| `SessionStart` | When session starts | N/A | N/A | command |
+
 #### Hook Trait
 
 ```typescript
@@ -130,7 +145,7 @@ class HookRunner {
 
 > **Engineering Practice:** See [hook-system-impl.md](../references/best-practices/hook-system-impl.md) for `HookRunner` implementation with error isolation, priority-based ordering, input modification chain, and built-in hooks pattern.
 
-#### Built-in Hooks
+#### Built-in Hooks (Priority-ordered)
 
 | Hook | Type | Priority | Purpose |
 |------|------|----------|---------|
@@ -142,6 +157,48 @@ class HookRunner {
 | `auto-retry` | Post | 20 | Retry failed network calls once |
 | `cache-result` | Post | 30 | Cache successful tool results by input hash |
 | `log-execution` | Post | 100 | Log execution to audit trail |
+
+**Hook execution pipeline**:
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  PreToolUse Hooks (Priority 10 → 40 → ...)                   │
+│     │                                                        │
+│     ├── validate-schema (10)                                 │
+│     │     │                                                 │
+│     │     ▼ (if continue)                                   │
+│     ├── check-permissions (20)                              │
+│     │     │                                                 │
+│     │     ▼ (if continue)                                   │
+│     └── rate-limiter (30)                                    │
+│            │                                                │
+└──────────────────────────────────────────────────────────────┘
+                          ▼ (blocked or continue)
+┌──────────────────────────────────────────────────────────────┐
+│  Tool Execution                                              │
+└──────────────────────────────────────────────────────────────┘
+                          ▼
+┌──────────────────────────────────────────────────────────────┐
+│  PostToolUse Hooks (Priority 10 → 30 → 100 → ...)           │
+│     │                                                        │
+│     ├── format-output (10)                                  │
+│     │     │                                                 │
+│     │     ▼                                                 │
+│     ├── auto-retry (20)                                     │
+│     │     │                                                 │
+│     │     ▼                                                 │
+│     ├── cache-result (30)                                   │
+│     │     │                                                 │
+│     │     ▼                                                 │
+│     └── log-execution (100)                                 │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Key hook behavior**:
+- **Priority ordering**: Lower number executes first
+- **Short-circuit on block**: `blocked` status skips remaining hooks and tool execution
+- **Error isolation**: Hook exception logs error and continues — never breaks tool chain
+- **Input modification chain**: Each hook's modified input passes to next hook
 
 ### 3.2 Plugin System
 
@@ -174,6 +231,29 @@ interface PluginDependency {
   name: string
   version_range: string  // SemVer: "^1.0.0", ">=2.0.0"
 }
+```
+
+#### Plugin Lifecycle State Machine
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  registered                                                 │
+│     │                                                        │
+│     ▼ (load)                                               │
+│  init ─────────────────────────────────────────┐           │
+│     │                                         │            │
+│     ├─── success ────────────────────────────► enabled     │
+│     │                                                        │
+│     └─── error ─────────────────────────────► init (with error) │
+│                                                        │     │
+└──────────────────────────────────────────────────────────┘     │
+                          │ (disable)                              │
+                          ▼                                        │
+                       disabled ◄───────────────────────────────────┘
+                          │ (enable)
+                          │
+                          ▼ (unload)
+                       unloaded
 ```
 
 #### Plugin Manager
@@ -228,6 +308,24 @@ class PluginManager {
     this.plugins.delete(name)
   }
 }
+```
+
+#### MCP Server Integration
+
+MCP servers are treated as plugins with dynamic tool discovery:
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  MCP Server                                                  │
+│     │                                                        │
+│     ├── tools: dynamically discovered at connection          │
+│     ├── resources: exposed resources                        │
+│     ├── prompts: server-provided prompts                    │
+│     └── instructions: delta for system prompt              │
+└──────────────────────────────────────────────────────────────┘
+```
+
+Tool naming convention: `mcp__<serverName>__<toolName>` (e.g., `mcp__filesystem__read`)
 ```
 
 ---
